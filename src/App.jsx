@@ -148,7 +148,7 @@ function Butterfly({ size = 13, color = T.gold }) {
 /* ================== DADOS DE EXEMPLO ================== */
 
 const clientes = [
-  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", data: "2026-08-12"
+  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", data: "2026-08-12" },
   { nome: "Carlos Lima", telefone: "(51) 98888-2222", cidade: "Tramandaí", status: "Em negociação", data: "2026-08-11" },
   { nome: "Juliana Alves", telefone: "(51) 97777-3333", cidade: "Imbé", status: "Proposta", data: "2026-08-10" },
   { nome: "Roberto Silva", telefone: "(51) 96666-4444", cidade: "Osório", status: "Contato inicial", data: "2026-08-09" },
