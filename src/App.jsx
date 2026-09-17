@@ -148,7 +148,7 @@ function Butterfly({ size = 13, color = T.gold }) {
 /* ================== DADOS DE EXEMPLO ================== */
 
 const clientes = [
-  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", : "2026-08-12" },
+  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", data: "2026-08-12"
   { nome: "Carlos Lima", telefone: "(51) 98888-2222", cidade: "Tramandaí", status: "Em negociação", data: "2026-08-11" },
   { nome: "Juliana Alves", telefone: "(51) 97777-3333", cidade: "Imbé", status: "Proposta", data: "2026-08-10" },
   { nome: "Roberto Silva", telefone: "(51) 96666-4444", cidade: "Osório", status: "Contato inicial", data: "2026-08-09" },
@@ -186,31 +186,23 @@ const dataBR = (iso) => {
   const [a, m, d] = iso.split("-");
   return `${d}/${m}/${a}`;
 };
-185   const dataBR = (iso) => {
-186     const [a, m, d] = iso.split("-");
-187     return `${d}/${m}/${a}`;
-188   };
-189   
-190   /** Guarda o estado no localStorage — os dados não se perdem ao recarregar. */
-191   function useLocalStorage(chave, valorInicial) {
-192     const [valor, setValor] = useState(() => {
-193       try {
-194         const salvo = localStorage.getItem(chave);
-195         return salvo ? JSON.parse(salvo) : valorInicial;
-196       } catch {
-197         return valorInicial;
-198       }
-199     });
-200     useEffect(() => {
-201       try {
-202         localStorage.setItem(chave, JSON.stringify(valor));
-203       } catch {}
-204     }, [chave, valor]);
-205     return [valor, setValor];
-206   }
-207   
-208   /** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
-209   function filtrarPorPeriodo(lista, de, ate) {
+/** Guarda o estado no localStorage — os dados não se perdem ao recarregar. */
+function useLocalStorage(chave, valorInicial) {
+  const [valor, setValor] = useState(() => {
+    try {
+      const salvo = localStorage.getItem(chave);
+      return salvo ? JSON.parse(salvo) : valorInicial;
+    } catch {
+      return valorInicial;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(chave, JSON.stringify(valor));
+    } catch {}
+  }, [chave, valor]);
+  return [valor, setValor];
+}
 ...
 /** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
 function filtrarPorPeriodo(lista, de, ate) {
@@ -1290,6 +1282,7 @@ function Logo() {
 
 const MENU = [
   { id: "inicio", rotulo: "Início", icon: IconHome },
+  { id: "agenda", rotulo: "Agenda", icon: IconCalendar },
   { id: "clientes", rotulo: "Clientes", icon: IconUser },
   { id: "contatos", rotulo: "Contatos", icon: IconChat },
   { id: "orcamentos", rotulo: "Orçamentos", icon: IconDoc },
@@ -1304,8 +1297,9 @@ export default function App() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   const props = { de, ate, setDe, setAte };
-  const telas = {
+    const telas = {
     inicio: <Inicio {...props} />,
+    agenda: <Agenda />,
     clientes: <Clientes {...props} />,
     contatos: <Contatos {...props} />,
     orcamentos: <Orcamentos {...props} />,
