@@ -129,6 +129,17 @@ const IconCalendar = ic(
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
 const IconTrend = ic(
+   const IconWallet = ic(const IconKanban = ic(
+  <>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M9 4v16M15 4v16" />
+  </>
+);
+  <>
+    <rect x="3" y="6" width="18" height="13" rx="2" />
+    <path d="M3 10h18M15 14h3" />
+  </>
+);
   <>
     <path d="M3 17l6-6 4 4 8-8" />
     <path d="M14 7h7v7" />
@@ -1178,7 +1189,252 @@ function Agenda() {
     </div>
   );
 }
+/* ================== PAGAMENTOS ================== */
+
+const FORMAS_PAGAMENTO = ["Pix", "Cartão", "Dinheiro", "Boleto"];
+const CHIP_PAG = { Pendente: T.orange, Pago: T.green };
+
+function ChipPagamento({ children }) {
+  const cor = CHIP_PAG[children] || T.grey;
+  return (
+    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap", background: cor, color: "#0C0C0D" }}>
+      {children}
+    </span>
+  );
+}
+
+function Pagamentos({ de, ate, setDe, setAte }) {
+  const [pagamentos, setPagamentos] = useLocalStorage("crm_pagamentos", []);
+  const [busca, setBusca] = useState("");
+  const [status, setStatus] = useState("Todos");
+  const [form, setForm] = useState({ cliente: "", telefone: "", descricao: "", valor: "", forma: "Pix", data: "" });
+
+  function atualizar(campo, valor) {
+    setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  function adicionar() {
+    if (!form.cliente || !form.valor || !form.data) {
+      alert("Preencha ao menos o nome do paciente, o valor e o vencimento.");
+      return;
+    }
+    setPagamentos((lista) => [
+      ...lista,
+      { id: Date.now(), ...form, valor: Number(form.valor), status: "Pendente", dataPagamento: null },
+    ]);
+    setForm({ cliente: "", telefone: "", descricao: "", valor: "", forma: "Pix", data: "" });
+  }
+
+  function marcarPago(id) {
+    setPagamentos((lista) =>
+      lista.map((p) => (p.id === id ? { ...p, status: "Pago", dataPagamento: new Date().toISOString().slice(0, 10) } : p))
+    );
+  }
+
+  function marcarPendente(id) {
+    setPagamentos((lista) => lista.map((p) => (p.id === id ? { ...p, status: "Pendente", dataPagamento: null } : p)));
+  }
+
+  function remover(id) {
+    if (confirm("Remover este lançamento?")) {
+      setPagamentos((lista) => lista.filter((p) => p.id !== id));
+    }
+  }
+
+  const dados = useMemo(() => {
+    let l = filtrarPorPeriodo(pagamentos, de, ate);
+    if (status !== "Todos") l = l.filter((p) => p.status === status);
+    const q = busca.trim().toLowerCase();
+    if (q) l = l.filter((p) => [p.cliente, p.telefone, p.descricao].join(" ").toLowerCase().includes(q));
+    return l;
+  }, [pagamentos, busca, status, de, ate]);
+
+  const totalPendente = pagamentos.filter((p) => p.status === "Pendente").reduce((s, p) => s + p.valor, 0);
+  const totalPago = pagamentos.filter((p) => p.status === "Pago").reduce((s, p) => s + p.valor, 0);
+  const qtdPendente = pagamentos.filter((p) => p.status === "Pendente").length;
+  const qtdPago = pagamentos.filter((p) => p.status === "Pago").length;
+
+  const colunas = ["Paciente", "Descrição", "Valor", "Forma", "Vencimento", "Status", "Pago em"];
+  const linhas = dados.map((p) => [p.cliente, p.descricao, brl(p.valor), p.forma, dataBR(p.data), p.status, p.dataPagamento ? dataBR(p.dataPagamento) : "—"]);
+  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
+
+  return (
+    <div>
+      <PageHead titulo="Pagamentos" sub="Controle o que está pendente e o que já foi recebido." />
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 16 }}>
+        <StatCard rotulo="Pendente" valor={brl(totalPendente).replace(",00", "")} icon={IconWallet} />
+        <StatCard rotulo="Recebido" valor={brl(totalPago).replace(",00", "")} icon={IconCheck} />
+        <StatCard rotulo="Lançamentos pendentes" valor={qtdPendente} icon={IconDoc} />
+        <StatCard rotulo="Lançamentos pagos" valor={qtdPago} icon={IconDoc} />
+      </div>
+
+      <Panel style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo lançamento</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
+          <input style={inputBase} placeholder="Nome do paciente" value={form.cliente} onChange={(e) => atualizar("cliente", e.target.value)} />
+          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
+          <input style={inputBase} placeholder="Descrição (ex: Consulta)" value={form.descricao} onChange={(e) => atualizar("descricao", e.target.value)} />
+          <input style={inputBase} type="number" placeholder="Valor (R$)" value={form.valor} onChange={(e) => atualizar("valor", e.target.value)} />
+          <Select value={form.forma} onChange={(v) => atualizar("forma", v)} options={FORMAS_PAGAMENTO} />
+          <input style={{ ...inputBase, colorScheme: "dark" }} type="date" value={form.data} onChange={(e) => atualizar("data", e.target.value)} />
+        </div>
+        <GoldButton icon={IconPlus} onClick={adicionar}>Lançar</GoldButton>
+      </Panel>
+
+      <Toolbar>
+        <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por paciente, telefone ou descrição..." />
+        <Select value={status} onChange={setStatus} options={["Todos", "Pendente", "Pago"]} />
+        <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
+        <ExportBar titulo="Pagamentos" colunas={colunas} linhas={linhas} periodo={periodo} />
+      </Toolbar>
+
+      <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
+        {dados.map((p) => (
+          <tr key={p.id}>
+            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{p.cliente}</td>
+            <td style={td}>{p.descricao}</td>
+            <td style={{ ...td, color: T.gold, fontWeight: 600 }}>{brl(p.valor)}</td>
+            <td style={td}>{p.forma}</td>
+            <td style={td}>{dataBR(p.data)}</td>
+            <td style={td}><ChipPagamento>{p.status}</ChipPagamento></td>
+            <td style={td}>{p.dataPagamento ? dataBR(p.dataPagamento) : "—"}</td>
+            <td style={{ ...td, textAlign: "right" }}>
+              {p.status === "Pendente" ? (
+                <GhostButton onClick={() => marcarPago(p.id)}>Marcar pago</GhostButton>
+              ) : (
+                <GhostButton onClick={() => marcarPendente(p.id)}>Reabrir</GhostButton>
+              )}
+              <button onClick={() => remover(p.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 5, marginLeft: 6 }} title="Remover">✕</button>
+            </td>
+          </tr>
+        ))}
+      </Table>
+      <Rodape n={dados.length} total={pagamentos.length} />
+    </div>
+  );
+}
 function Configuracoes() {
+   /* ================== KANBAN DE LEADS ================== */
+
+const ETAPAS_KANBAN = ["Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"];
+const COR_ETAPA = {
+  "Novo lead": T.gold,
+  "Em atendimento": T.blue,
+  "Follow up": T.orange,
+  "Agendado": T.goldLight,
+  "Paciente": T.green,
+  "Sem interesse": T.grey,
+};
+
+function CartaoLead({ lead, onMover, onRemover, arrastando, setArrastando }) {
+  return (
+    <div
+      draggable
+      onDragStart={() => setArrastando(lead.id)}
+      onDragEnd={() => setArrastando(null)}
+      style={{
+        background: T.card,
+        border: `1px solid ${T.borderSoft}`,
+        borderRadius: 9,
+        padding: 12,
+        marginBottom: 10,
+        cursor: "grab",
+        opacity: arrastando === lead.id ? 0.4 : 1,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{lead.nome}</div>
+        <CopyButton texto={`${lead.nome}\n${lead.telefone}\nOrigem: ${lead.origem}\nEtapa: ${lead.etapa}`} title="Copiar dados" />
+      </div>
+      <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>{lead.telefone}</div>
+      {lead.origem && <div style={{ fontSize: 11, color: T.muted, marginTop: 4 }}>Origem: {lead.origem}</div>}
+      <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+        <select
+          value={lead.etapa}
+          onChange={(e) => onMover(lead.id, e.target.value)}
+          style={{ ...inputBase, flex: 1, padding: "5px 8px", fontSize: 11.5 }}
+        >
+          {ETAPAS_KANBAN.map((e) => (
+            <option key={e} value={e}>{e}</option>
+          ))}
+        </select>
+        <button onClick={() => onRemover(lead.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 4 }} title="Remover">✕</button>
+      </div>
+    </div>
+  );
+}
+
+function Kanban() {
+  const [leads, setLeads] = useLocalStorage("crm_leads", []);
+  const [form, setForm] = useState({ nome: "", telefone: "", origem: "WhatsApp" });
+  const [arrastando, setArrastando] = useState(null);
+
+  function atualizar(campo, valor) {
+    setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  function adicionar() {
+    if (!form.nome || !form.telefone) {
+      alert("Preencha ao menos o nome e o telefone do lead.");
+      return;
+    }
+    setLeads((lista) => [...lista, { id: Date.now(), ...form, etapa: "Novo lead" }]);
+    setForm({ nome: "", telefone: "", origem: "WhatsApp" });
+  }
+
+  function mover(id, etapa) {
+    setLeads((lista) => lista.map((l) => (l.id === id ? { ...l, etapa } : l)));
+  }
+
+  function remover(id) {
+    if (confirm("Remover este lead?")) {
+      setLeads((lista) => lista.filter((l) => l.id !== id));
+    }
+  }
+
+  return (
+    <div>
+      <PageHead titulo="Kanban de leads" sub="Arraste os cartões entre as colunas ou use o seletor de etapa." />
+
+      <Panel style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo lead</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
+          <input style={inputBase} placeholder="Nome" value={form.nome} onChange={(e) => atualizar("nome", e.target.value)} />
+          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
+          <Select value={form.origem} onChange={(v) => atualizar("origem", v)} options={["WhatsApp", "Instagram", "Ligação", "Site", "Indicação"]} />
+        </div>
+        <GoldButton icon={IconPlus} onClick={adicionar}>Adicionar lead</GoldButton>
+      </Panel>
+
+      <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
+        {ETAPAS_KANBAN.map((etapa) => {
+          const doEtapa = leads.filter((l) => l.etapa === etapa);
+          return (
+            <div
+              key={etapa}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => arrastando && mover(arrastando, etapa)}
+              style={{ minWidth: 230, flex: "0 0 230px", background: T.panel, border: `1px solid ${T.borderSoft}`, borderRadius: 10, padding: 12 }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}>
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: COR_ETAPA[etapa] }} />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: T.text }}>{etapa}</span>
+                <span style={{ fontSize: 11.5, color: T.muted, marginLeft: "auto" }}>{doEtapa.length}</span>
+              </div>
+              {doEtapa.map((lead) => (
+                <CartaoLead key={lead.id} lead={lead} onMover={mover} onRemover={remover} arrastando={arrastando} setArrastando={setArrastando} />
+              ))}
+              {doEtapa.length === 0 && (
+                <div style={{ fontSize: 11.5, color: T.muted, textAlign: "center", padding: "16px 0" }}>Nenhum lead aqui</div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
   const [prefs, setPrefs] = useState({ email: true, whatsapp: true, escuro: true });
   const toggle = (k) => setPrefs((p) => ({ ...p, [k]: !p[k] }));
   const linhas = [
@@ -1281,8 +1537,11 @@ function Logo() {
 }
 
 const MENU = [
+  const MENU = [
   { id: "inicio", rotulo: "Início", icon: IconHome },
   { id: "agenda", rotulo: "Agenda", icon: IconCalendar },
+  { id: "kanban", rotulo: "Kanban de leads", icon: IconKanban },
+  { id: "pagamentos", rotulo: "Pagamentos", icon: IconWallet },
   { id: "clientes", rotulo: "Clientes", icon: IconUser },
   { id: "contatos", rotulo: "Contatos", icon: IconChat },
   { id: "orcamentos", rotulo: "Orçamentos", icon: IconDoc },
@@ -1297,9 +1556,11 @@ export default function App() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   const props = { de, ate, setDe, setAte };
-    const telas = {
+      const telas = {
     inicio: <Inicio {...props} />,
     agenda: <Agenda />,
+    kanban: <Kanban />,
+    pagamentos: <Pagamentos {...props} />,
     clientes: <Clientes {...props} />,
     contatos: <Contatos {...props} />,
     orcamentos: <Orcamentos {...props} />,
@@ -1307,7 +1568,7 @@ export default function App() {
     relatorios: <Relatorios {...props} />,
     config: <Configuracoes />,
   };
-
+   
   const itemStyle = (ativo) => ({
     display: "flex",
     alignItems: "center",
