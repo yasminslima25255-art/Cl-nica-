@@ -128,6 +128,27 @@ const IconCalendar = ic(
   </>
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
+const IconTrend = ic(
+  <>
+    <path d="M3 17l6-6 4 4 8-9" />
+    <path d="M15 6h6v6" />
+  </>
+);
+
+const IconWallet = ic(
+  <>
+    <path d="M3 7h17a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+    <path d="M3 7V5a2 2 0 0 1 2-2h14" />
+    <path d="M17 13h4" />
+  </>
+);
+
+const IconKanban = ic(
+  <>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M8 8v8M12 8v5M16 8v3" />
+  </>
+);
 /* Borboleta — usada UMA única vez, apenas na logo */
 function Butterfly({ size = 13, color = T.gold }) {
   return (
