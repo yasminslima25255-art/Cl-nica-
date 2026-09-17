@@ -128,8 +128,6 @@ const IconCalendar = ic(
   </>
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
-
-
 /* Borboleta — usada UMA única vez, apenas na logo */
 function Butterfly({ size = 13, color = T.gold }) {
   return (
