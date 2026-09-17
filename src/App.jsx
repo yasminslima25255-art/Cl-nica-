@@ -129,22 +129,7 @@ const IconCalendar = ic(
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
 const IconTrend = ic(
-   const IconWallet = ic(const IconKanban = ic(
-  <>
-    <rect x="3" y="4" width="18" height="16" rx="2" />
-    <path d="M9 4v16M15 4v16" />
-  </>
-);
-  <>
-    <rect x="3" y="6" width="18" height="13" rx="2" />
-    <path d="M3 10h18M15 14h3" />
-  </>
-);
-  <>
-    <path d="M3 17l6-6 4 4 8-8" />
-    <path d="M14 7h7v7" />
-  </>
-);
+
 
 /* Borboleta — usada UMA única vez, apenas na logo */
 function Butterfly({ size = 13, color = T.gold }) {
@@ -1314,8 +1299,7 @@ function Pagamentos({ de, ate, setDe, setAte }) {
     </div>
   );
 }
-function Configuracoes() {
-   /* ================== KANBAN DE LEADS ================== */
+/* ================== KANBAN DE LEADS ================== */
 
 const ETAPAS_KANBAN = ["Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"];
 const COR_ETAPA = {
@@ -1435,6 +1419,8 @@ function Kanban() {
     </div>
   );
 }
+
+function Configuracoes() {
   const [prefs, setPrefs] = useState({ email: true, whatsapp: true, escuro: true });
   const toggle = (k) => setPrefs((p) => ({ ...p, [k]: !p[k] }));
   const linhas = [
@@ -1537,7 +1523,6 @@ function Logo() {
 }
 
 const MENU = [
-  const MENU = [
   { id: "inicio", rotulo: "Início", icon: IconHome },
   { id: "agenda", rotulo: "Agenda", icon: IconCalendar },
   { id: "kanban", rotulo: "Kanban de leads", icon: IconKanban },
