@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from "react";
-
+import React, { useState, useEffect, useMemo } from "react";
 /* ==========================================================
    CRM VENDAS — tema preto e dourado
    Sem dependências externas (só React). Ícones e gráficos
@@ -149,7 +148,7 @@ function Butterfly({ size = 13, color = T.gold }) {
 /* ================== DADOS DE EXEMPLO ================== */
 
 const clientes = [
-  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", data: "2026-08-12" },
+  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", : "2026-08-12" },
   { nome: "Carlos Lima", telefone: "(51) 98888-2222", cidade: "Tramandaí", status: "Em negociação", data: "2026-08-11" },
   { nome: "Juliana Alves", telefone: "(51) 97777-3333", cidade: "Imbé", status: "Proposta", data: "2026-08-10" },
   { nome: "Roberto Silva", telefone: "(51) 96666-4444", cidade: "Osório", status: "Contato inicial", data: "2026-08-09" },
@@ -187,7 +186,32 @@ const dataBR = (iso) => {
   const [a, m, d] = iso.split("-");
   return `${d}/${m}/${a}`;
 };
-
+185   const dataBR = (iso) => {
+186     const [a, m, d] = iso.split("-");
+187     return `${d}/${m}/${a}`;
+188   };
+189   
+190   /** Guarda o estado no localStorage — os dados não se perdem ao recarregar. */
+191   function useLocalStorage(chave, valorInicial) {
+192     const [valor, setValor] = useState(() => {
+193       try {
+194         const salvo = localStorage.getItem(chave);
+195         return salvo ? JSON.parse(salvo) : valorInicial;
+196       } catch {
+197         return valorInicial;
+198       }
+199     });
+200     useEffect(() => {
+201       try {
+202         localStorage.setItem(chave, JSON.stringify(valor));
+203       } catch {}
+204     }, [chave, valor]);
+205     return [valor, setValor];
+206   }
+207   
+208   /** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
+209   function filtrarPorPeriodo(lista, de, ate) {
+...
 /** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
 function filtrarPorPeriodo(lista, de, ate) {
   return lista.filter((r) => {
@@ -1043,6 +1067,7 @@ function Relatorios({ de, ate, setDe, setAte }) {
             <ExportBar titulo="Relatório de vendas" colunas={colunas} linhas={linhas} periodo={periodo} />
           </div>
         }
+         
       />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 16 }}>
         <StatCard rotulo="Vendas" valor={brl(receita).replace(",00", "")} delta="28%" icon={IconTrend} />
@@ -1064,7 +1089,103 @@ function Relatorios({ de, ate, setDe, setAte }) {
     </div>
   );
 }
+/* ================== AGENDA ================== */
 
+const STATUS_AGENDA = ["Agendado", "Concluído", "Cancelado"];
+const CHIP_AGENDA = { Agendado: T.blue, "Concluído": T.green, Cancelado: T.red };
+
+function ChipAgenda({ children }) {
+  const cor = CHIP_AGENDA[children] || T.grey;
+  return (
+    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap", background: cor, color: "#0C0C0D" }}>
+      {children}
+    </span>
+  );
+}
+
+function Agenda() {
+  const [compromissos, setCompromissos] = useLocalStorage("crm_agenda", []);
+  const [form, setForm] = useState({ cliente: "", telefone: "", data: "", hora: "", tipo: "Consulta", obs: "" });
+  const [filtroData, setFiltroData] = useState("");
+
+  function atualizar(campo, valor) {
+    setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  function adicionar() {
+    if (!form.cliente || !form.data || !form.hora) {
+      alert("Preencha ao menos o nome do paciente, a data e a hora.");
+      return;
+    }
+    setCompromissos((lista) => [...lista, { id: Date.now(), ...form, status: "Agendado" }]);
+    setForm({ cliente: "", telefone: "", data: "", hora: "", tipo: "Consulta", obs: "" });
+  }
+
+  function mudarStatus(id, status) {
+    setCompromissos((lista) => lista.map((c) => (c.id === id ? { ...c, status } : c)));
+  }
+
+  function remover(id) {
+    if (confirm("Remover este agendamento?")) {
+      setCompromissos((lista) => lista.filter((c) => c.id !== id));
+    }
+  }
+
+  const ordenados = useMemo(() => {
+    let l = [...compromissos].sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora));
+    if (filtroData) l = l.filter((c) => c.data === filtroData);
+    return l;
+  }, [compromissos, filtroData]);
+
+  return (
+    <div>
+      <PageHead titulo="Agenda" sub="Marque, acompanhe e organize os atendimentos da clínica." />
+
+      <Panel style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo agendamento</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
+          <input style={inputBase} placeholder="Nome do paciente" value={form.cliente} onChange={(e) => atualizar("cliente", e.target.value)} />
+          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
+          <input style={{ ...inputBase, colorScheme: "dark" }} type="date" value={form.data} onChange={(e) => atualizar("data", e.target.value)} />
+          <input style={{ ...inputBase, colorScheme: "dark" }} type="time" value={form.hora} onChange={(e) => atualizar("hora", e.target.value)} />
+          <Select value={form.tipo} onChange={(v) => atualizar("tipo", v)} options={["Consulta", "Retorno", "Avaliação", "Procedimento"]} />
+        </div>
+        <input style={{ ...inputBase, width: "100%", marginBottom: 12 }} placeholder="Observações (opcional)" value={form.obs} onChange={(e) => atualizar("obs", e.target.value)} />
+        <GoldButton icon={IconPlus} onClick={adicionar}>Agendar</GoldButton>
+      </Panel>
+
+      <Toolbar>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: "5px 10px" }}>
+          <IconCalendar size={14} color={T.gold} />
+          <input type="date" value={filtroData} onChange={(e) => setFiltroData(e.target.value)} style={{ ...inputBase, border: "none", background: "transparent", padding: "4px 2px", colorScheme: "dark" }} />
+          {filtroData && (
+            <button onClick={() => setFiltroData("")} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", fontSize: 16 }}>×</button>
+          )}
+        </div>
+      </Toolbar>
+
+      <Table head={["Paciente", "Telefone", "Data", "Hora", "Tipo", "Status", "Ações"]} vazio={ordenados.length === 0}>
+        {ordenados.map((c) => (
+          <tr key={c.id}>
+            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.cliente}</td>
+            <td style={td}>{c.telefone}</td>
+            <td style={td}>{c.data ? dataBR(c.data) : ""}</td>
+            <td style={td}>{c.hora}</td>
+            <td style={td}>{c.tipo}</td>
+            <td style={td}><ChipAgenda>{c.status}</ChipAgenda></td>
+            <td style={{ ...td, textAlign: "right" }}>
+              <select value={c.status} onChange={(e) => mudarStatus(c.id, e.target.value)} style={{ ...inputBase, padding: "5px 8px", fontSize: 12, marginRight: 6 }}>
+                {STATUS_AGENDA.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <button onClick={() => remover(c.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 5 }} title="Remover">✕</button>
+            </td>
+          </tr>
+        ))}
+      </Table>
+      <Rodape n={ordenados.length} total={compromissos.length} />
+    </div>
+  );
+}
 function Configuracoes() {
   const [prefs, setPrefs] = useState({ email: true, whatsapp: true, escuro: true });
   const toggle = (k) => setPrefs((p) => ({ ...p, [k]: !p[k] }));
