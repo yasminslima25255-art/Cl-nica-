@@ -128,6 +128,7 @@ const IconCalendar = ic(
   </>
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
+
 const IconTrend = ic(
   <>
     <path d="M3 17l6-6 4 4 8-9" />
