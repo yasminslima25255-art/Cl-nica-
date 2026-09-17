@@ -202,8 +202,8 @@ function useLocalStorage(chave, valorInicial) {
     } catch {}
   }, [chave, valor]);
   return [valor, setValor];
+   
 }
-...
 /** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
 function filtrarPorPeriodo(lista, de, ate) {
   return lista.filter((r) => {
