@@ -1690,7 +1690,7 @@ export default function App() {
     agenda: <Agenda />,
     kanban: <Kanban />,
     pagamentos: <Pagamentos {...props} />,
-    clientes: <Clientes {...props} />,
+    clientes: <Pacientes {...props} />,
     contatos: <Contatos {...props} />,
     orcamentos: <Orcamentos {...props} />,
     funil: <Funil {...props} />,
