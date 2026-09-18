@@ -162,38 +162,38 @@ function Butterfly({ size = 13, color = T.gold }) {
 
 /* ================== DADOS DE EXEMPLO ================== */
 
-const clientes = [
-  { nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Cliente", data: "2026-08-12" },
-  { nome: "Carlos Lima", telefone: "(51) 98888-2222", cidade: "Tramandaí", status: "Em negociação", data: "2026-08-11" },
-  { nome: "Juliana Alves", telefone: "(51) 97777-3333", cidade: "Imbé", status: "Proposta", data: "2026-08-10" },
-  { nome: "Roberto Silva", telefone: "(51) 96666-4444", cidade: "Osório", status: "Contato inicial", data: "2026-08-09" },
-  { nome: "Ana Paula", telefone: "(51) 95555-5555", cidade: "Tramandaí", status: "Cliente", data: "2026-08-08" },
-  { nome: "Fernando Costa", telefone: "(51) 94444-6666", cidade: "Capão da Canoa", status: "Sem retorno", data: "2026-08-07" },
-  { nome: "Beatriz Rocha", telefone: "(51) 93333-7777", cidade: "Osório", status: "Em atendimento", data: "2026-08-06" },
-  { nome: "Rafael Moreira", telefone: "(51) 92222-8888", cidade: "Imbé", status: "Em negociação", data: "2026-07-30" },
+let proximoId = 1000;
+const gerarId = () => ++proximoId;
+
+const pacientesIniciais = [
+  { id: 1, nome: "Maria Souza", telefone: "(51) 99999-1111", cidade: "Osório", status: "Paciente", data: "2026-08-12", arquivado: false },
+  { id: 2, nome: "Carlos Lima", telefone: "(51) 98888-2222", cidade: "Tramandaí", status: "Em atendimento", data: "2026-08-11", arquivado: false },
+  { id: 3, nome: "Juliana Alves", telefone: "(51) 97777-3333", cidade: "Imbé", status: "Follow up", data: "2026-08-10", arquivado: false },
+  { id: 4, nome: "Roberto Silva", telefone: "(51) 96666-4444", cidade: "Osório", status: "Novo lead", data: "2026-09-16", arquivado: false },
+  { id: 5, nome: "Ana Paula", telefone: "(51) 95555-5555", cidade: "Tramandaí", status: "Paciente", data: "2026-08-08", arquivado: false },
+  { id: 6, nome: "Fernando Costa", telefone: "(51) 94444-6666", cidade: "Capão da Canoa", status: "Sem interesse", data: "2026-08-07", arquivado: false },
+  { id: 7, nome: "Beatriz Rocha", telefone: "(51) 93333-7777", cidade: "Osório", status: "Agendado", data: "2026-09-15", arquivado: false },
+  { id: 8, nome: "Rafael Moreira", telefone: "(51) 92222-8888", cidade: "Imbé", status: "Em atendimento", data: "2026-08-30", arquivado: false },
+];
+
+const agendaInicial = [
+  { id: 101, paciente: "Maria Souza", telefone: "(51) 99999-1111", data: "2026-09-18", hora: "09:00", tipo: "Consulta", status: "Agendado", obs: "" },
+  { id: 102, paciente: "Beatriz Rocha", telefone: "(51) 93333-7777", data: "2026-09-18", hora: "10:30", tipo: "Avaliação", status: "Agendado", obs: "" },
+  { id: 103, paciente: "Ana Paula", telefone: "(51) 95555-5555", data: "2026-09-15", hora: "14:00", tipo: "Retorno", status: "Concluído", obs: "" },
+  { id: 104, paciente: "Carlos Lima", telefone: "(51) 98888-2222", data: "2026-09-22", hora: "11:00", tipo: "Consulta", status: "Agendado", obs: "" },
+  { id: 105, paciente: "Juliana Alves", telefone: "(51) 97777-3333", data: "2026-09-12", hora: "09:30", tipo: "Consulta", status: "Cancelado", obs: "" },
+  { id: 106, paciente: "Rafael Moreira", telefone: "(51) 92222-8888", data: "2026-09-25", hora: "16:00", tipo: "Avaliação", status: "Agendado", obs: "" },
+];
+
+const pagamentosIniciais = [
+  { id: 201, paciente: "Maria Souza", valor: 450, vencimento: "2026-09-10", status: "Pago", forma: "Pix" },
+  { id: 202, paciente: "Ana Paula", valor: 680, vencimento: "2026-09-05", status: "Pago", forma: "Cartão" },
+  { id: 203, paciente: "Beatriz Rocha", valor: 320, vencimento: "2026-09-22", status: "Pendente", forma: "—" },
+  { id: 204, paciente: "Carlos Lima", valor: 900, vencimento: "2026-09-25", status: "Pendente", forma: "—" },
+  { id: 205, paciente: "Rafael Moreira", valor: 250, vencimento: "2026-08-30", status: "Pendente", forma: "—" },
 ];
 
 const contatos = [
-  { nome: "Mariana Alves", telefone: "(51) 98888-1234", origem: "WhatsApp", status: "Em atendimento", data: "2026-08-13" },
-  { nome: "Lucas Ferreira", telefone: "(51) 97777-2345", origem: "Instagram", status: "Novo contato", data: "2026-08-12" },
-  { nome: "Tatiane Souza", telefone: "(51) 96566-3456", origem: "Ligação", status: "Retorno agendado", data: "2026-08-11" },
-  { nome: "Gabriel Martins", telefone: "(51) 95555-4567", origem: "Site", status: "Orçamento enviado", data: "2026-08-10" },
-  { nome: "Camila Rocha", telefone: "(51) 94444-5678", origem: "Indicação", status: "Cliente em potencial", data: "2026-08-09" },
-  { nome: "Felipe Santos", telefone: "(51) 93333-6789", origem: "WhatsApp", status: "Em retorno", data: "2026-08-08" },
-  { nome: "Bruna Costa", telefone: "(51) 92222-7890", origem: "Instagram", status: "Em atendimento", data: "2026-08-07" },
-];
-
-const orcamentos = [
-  { numero: "0012", cliente: "Maria Souza", produto: "Energia Solar", valor: 6500, status: "Enviado", data: "2026-08-12" },
-  { numero: "0011", cliente: "Carlos Lima", produto: "Carregador Veicular", valor: 3200, status: "Em negociação", data: "2026-08-11" },
-  { numero: "0010", cliente: "Juliana Alves", produto: "Energia Solar", valor: 8900, status: "Aprovado", data: "2026-08-10" },
-  { numero: "0009", cliente: "Roberto Silva", produto: "Carregador Veicular", valor: 4600, status: "Enviado", data: "2026-08-09" },
-  { numero: "0008", cliente: "Ana Paula", produto: "Energia Solar", valor: 7300, status: "Aprovado", data: "2026-08-08" },
-  { numero: "0007", cliente: "Fernando Costa", produto: "Energia Solar", valor: 5600, status: "Perdido", data: "2026-08-07" },
-  { numero: "0006", cliente: "Beatriz Rocha", produto: "Carregador Veicular", valor: 4200, status: "Enviado", data: "2026-08-06" },
-  { numero: "0005", cliente: "Rafael Moreira", produto: "Energia Solar", valor: 9100, status: "Aprovado", data: "2026-07-29" },
-];
-
 /* ================== HELPERS ================== */
 
 const brl = (n) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -293,8 +293,65 @@ const CHIP = {
   "Cliente em potencial": T.grey,
   "Sem retorno": T.grey,
   Perdido: T.red,
+  "Novo lead": T.blue,
+  "Follow up": T.orange,
+  Agendado: T.purple,
+  Paciente: T.green,
+  "Sem interesse": T.grey,
+  Concluído: T.green,
+  Cancelado: T.red,
+  Pendente: T.gold,
+  Pago: T.green,
 };
+  Cliente: T.green,
+  Aprovado: T.green,
+  "Em atendimento": T.green,
+  "Em negociação": T.blue,
+  "Retorno agendado": T.blue,
+  "Orçamento enviado": T.blue,
+  Enviado: T.blue,
+  Proposta: T.gold,
+  "Novo contato": T.gold,
+  "Em retorno": T.gold,
+  "Contato inicial": T.grey,
+  "Cliente em potencial": T.grey,
+  "Sem retorno": T.grey,
+  Perdido: T.red,
+};
+/** Monta o link do WhatsApp Web a partir de um telefone brasileiro. */
+function linkWhatsApp(telefone) {
+  const digitos = telefone.replace(/\D/g, "");
+  const comPais = digitos.length <= 11 ? "55" + digitos : digitos;
+  return `https://wa.me/${comPais}`;
+}
 
+function BotaoWhatsApp({ telefone, texto }) {
+  return (
+    
+      href={linkWhatsApp(telefone)}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Abrir no WhatsApp Web"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        background: texto ? T.green + "1A" : "transparent",
+        color: T.green,
+        border: texto ? `1px solid ${T.green}55` : "none",
+        borderRadius: 8,
+        padding: texto ? "8px 13px" : 5,
+        fontSize: 12.5,
+        fontWeight: 600,
+        textDecoration: "none",
+        fontFamily: FONT,
+      }}
+    >
+      <IconChat size={14} />
+      {texto && "WhatsApp"}
+    </a>
+  );
+}
 function Chip({ children }) {
   const cor = CHIP[children] || T.grey;
   const solido = cor === T.green || cor === T.blue || cor === T.red;
@@ -316,7 +373,41 @@ function Chip({ children }) {
     </span>
   );
 }
+function BotaoAgendarIcon({ onClick, title }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title || "Agendar consulta"}
+      style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}
+    >
+      <IconCalendar size={14} />
+    </button>
+  );
+}
 
+function BotaoArquivarIcon({ onClick, title }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title || "Arquivar"}
+      style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}
+    >
+      <IconArchiveBox size={14} />
+    </button>
+  );
+}
+
+function BotaoRestaurarIcon({ onClick, title }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title || "Restaurar"}
+      style={{ background: "none", border: "none", color: T.green, cursor: "pointer", padding: 5, display: "flex" }}
+    >
+      <IconRestore size={14} />
+    </button>
+  );
+}
 function Panel({ children, style, pad = 20 }) {
   return (
     <div
@@ -611,7 +702,7 @@ function RowActions({ textoCopia }) {
   );
 }
 
-/* ================== GRÁFICOS (SVG) ================== */
+       /* ================== GRÁFICOS (SVG) ================== */
 
 function Donut({ dados, total, legendaCentro }) {
   const R = 52, SW = 16, C = 2 * Math.PI * R;
@@ -820,17 +911,20 @@ function Inicio({ de, ate, setDe, setAte }) {
   );
 }
 
-function Clientes({ de, ate, setDe, setAte }) {
+function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, setDe, setAte }) {
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
+  const [verArquivados, setVerArquivados] = useState(false);
+
+  const base = pacientes.filter((p) => (verArquivados ? p.arquivado : !p.arquivado));
 
   const dados = useMemo(() => {
-    let l = filtrarPorPeriodo(clientes, de, ate);
+    let l = filtrarPorPeriodo(base, de, ate);
     if (status !== "Todos") l = l.filter((c) => c.status === status);
     const q = busca.trim().toLowerCase();
     if (q) l = l.filter((c) => [c.nome, c.telefone, c.cidade].join(" ").toLowerCase().includes(q));
     return l;
-  }, [busca, status, de, ate]);
+  }, [base, busca, status, de, ate]);
 
   const colunas = ["Nome", "Telefone", "Cidade", "Status", "Último contato"];
   const linhas = dados.map((c) => [c.nome, c.telefone, c.cidade, c.status, dataBR(c.data)]);
@@ -838,16 +932,27 @@ function Clientes({ de, ate, setDe, setAte }) {
 
   return (
     <div>
-      <PageHead titulo="Clientes" sub="Gerencie seus clientes e acompanhe o histórico de cada um." acao={<GoldButton icon={IconPlus}>Novo cliente</GoldButton>} />
+      <PageHead
+        titulo="Pacientes"
+        sub="Gerencie seus pacientes e acompanhe o histórico de cada um."
+        acao={
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <GhostButton icon={verArquivados ? IconRestore : IconArchiveBox} onClick={() => setVerArquivados((v) => !v)}>
+              {verArquivados ? "Ver ativos" : "Ver arquivados"}
+            </GhostButton>
+            <GoldButton icon={IconPlus}>Novo paciente</GoldButton>
+          </div>
+        }
+      />
       <Toolbar>
         <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por nome, telefone ou cidade..." />
-        <Select value={status} onChange={setStatus} options={["Todos", "Cliente", "Em negociação", "Proposta", "Contato inicial", "Em atendimento", "Sem retorno"]} />
+        <Select value={status} onChange={setStatus} options={["Todos", "Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"]} />
         <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Clientes" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <ExportBar titulo="Pacientes" colunas={colunas} linhas={linhas} periodo={periodo} />
       </Toolbar>
       <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
-        {dados.map((c, i) => (
-          <tr key={i}>
+        {dados.map((c) => (
+          <tr key={c.id}>
             <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.nome}</td>
             <td style={td}>{c.telefone}</td>
             <td style={td}>{c.cidade}</td>
@@ -855,11 +960,25 @@ function Clientes({ de, ate, setDe, setAte }) {
               <Chip>{c.status}</Chip>
             </td>
             <td style={td}>{dataBR(c.data)}</td>
-            <RowActions textoCopia={`${c.nome}\n${c.telefone}\n${c.cidade}\nStatus: ${c.status}\nÚltimo contato: ${dataBR(c.data)}`} />
+            <td style={{ ...td, textAlign: "right" }}>
+              <span style={{ display: "inline-flex", gap: 2, alignItems: "center" }}>
+                <CopyButton
+                  texto={`${c.nome}\n${c.telefone}\n${c.cidade}\nStatus: ${c.status}\nÚltimo contato: ${dataBR(c.data)}`}
+                  title="Copiar dados deste paciente"
+                />
+                <BotaoWhatsApp telefone={c.telefone} />
+                {!verArquivados && <BotaoAgendarIcon onClick={() => onAgendar(c.nome, c.telefone)} />}
+                {verArquivados ? (
+                  <BotaoRestaurarIcon onClick={() => onRestaurar(c.id)} />
+                ) : (
+                  <BotaoArquivarIcon onClick={() => onArquivar(c.id)} />
+                )}
+              </span>
+            </td>
           </tr>
         ))}
       </Table>
-      <Rodape n={dados.length} total={clientes.length} />
+      <Rodape n={dados.length} total={base.length} />
     </div>
   );
 }
