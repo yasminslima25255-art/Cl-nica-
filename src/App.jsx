@@ -315,7 +315,7 @@ const CHIP = {
   Perdido: T.red,
   "Novo lead": T.blue,
   "Follow up": T.orange,
-  Agendado: purple: "#8B5FBF"
+ Agendado: "#8B5FBF",
   Paciente: T.green,
   "Sem interesse": T.grey,
   Concluído: T.green,
