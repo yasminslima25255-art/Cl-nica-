@@ -299,7 +299,7 @@ function exportarPDF(titulo, colunas, linhas, periodo) {
 /* ================== COMPONENTES BASE ================== */
 
 const CHIP = {
-  Cliente: T.green,
+
   Aprovado: T.green,
   "Em atendimento": T.green,
   "Em negociação": T.blue,
@@ -323,21 +323,7 @@ const CHIP = {
   Pendente: T.gold,
   Pago: T.green,
 };
-  Cliente: T.green,
-  Aprovado: T.green,
-  "Em atendimento": T.green,
-  "Em negociação": T.blue,
-  "Retorno agendado": T.blue,
-  "Orçamento enviado": T.blue,
-  Enviado: T.blue,
-  Proposta: T.gold,
-  "Novo contato": T.gold,
-  "Em retorno": T.gold,
-  "Contato inicial": T.grey,
-  "Cliente em potencial": T.grey,
-  "Sem retorno": T.grey,
-  Perdido: T.red,
-};
+
 /** Monta o link do WhatsApp Web a partir de um telefone brasileiro. */
 function linkWhatsApp(telefone) {
   const digitos = telefone.replace(/\D/g, "");
