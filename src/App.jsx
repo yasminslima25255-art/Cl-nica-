@@ -128,7 +128,20 @@ const IconCalendar = ic(
   </>
 );
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
+const IconArchiveBox = ic(
+  <>
+    <rect x="3" y="4" width="18" height="5" rx="1.5" />
+    <path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9" />
+    <path d="M10 13h4" />
+  </>
+);
 
+const IconRestore = ic(
+  <>
+    <path d="M3 12a9 9 0 1 0 3-6.7" />
+    <path d="M3 4v5h5" />
+  </>
+);
 const IconTrend = ic(
   <>
     <path d="M3 17l6-6 4 4 8-9" />
@@ -194,6 +207,13 @@ const pagamentosIniciais = [
 ];
 
 const contatos = [
+  { id: 301, nome: "Patrícia Gomes", telefone: "(51) 99111-2233", origem: "WhatsApp", status: "Novo contato", data: "2026-09-17" },
+  { id: 302, nome: "Eduardo Nunes", telefone: "(51) 98222-3344", origem: "Instagram", status: "Em atendimento", data: "2026-09-16" },
+  { id: 303, nome: "Camila Reis", telefone: "(51) 97333-4455", origem: "Indicação", status: "Retorno agendado", data: "2026-09-14" },
+  { id: 304, nome: "Thiago Barros", telefone: "(51) 96444-5566", origem: "Site", status: "Orçamento enviado", data: "2026-09-10" },
+  { id: 305, nome: "Larissa Dias", telefone: "(51) 95555-6677", origem: "Ligação", status: "Cliente em potencial", data: "2026-09-05" },
+  { id: 306, nome: "Bruno Castro", telefone: "(51) 94666-7788", origem: "WhatsApp", status: "Em retorno", data: "2026-09-01" },
+];
 /* ================== HELPERS ================== */
 
 const brl = (n) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -295,7 +315,7 @@ const CHIP = {
   Perdido: T.red,
   "Novo lead": T.blue,
   "Follow up": T.orange,
-  Agendado: T.purple,
+  Agendado: purple: "#8B5FBF"
   Paciente: T.green,
   "Sem interesse": T.grey,
   Concluído: T.green,
@@ -328,7 +348,7 @@ function linkWhatsApp(telefone) {
 function BotaoWhatsApp({ telefone, texto }) {
   return (
     
-      href={linkWhatsApp(telefone)}
+     <a href={linkWhatsApp(telefone)}
       target="_blank"
       rel="noopener noreferrer"
       title="Abrir no WhatsApp Web"
