@@ -299,7 +299,7 @@ function exportarPDF(titulo, colunas, linhas, periodo) {
 /* ================== COMPONENTES BASE ================== */
 
 const CHIP = {
-
+  Cliente: T.green,
   Aprovado: T.green,
   "Em atendimento": T.green,
   "Em negociação": T.blue,
@@ -315,7 +315,7 @@ const CHIP = {
   Perdido: T.red,
   "Novo lead": T.blue,
   "Follow up": T.orange,
- Agendado: "#8B5FBF",
+  "Agendado": "#8B5FBF",
   Paciente: T.green,
   "Sem interesse": T.grey,
   Concluído: T.green,
