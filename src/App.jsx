@@ -188,6 +188,8 @@ const pacientesIniciais = [
   { id: 7, nome: "Beatriz Rocha", telefone: "(51) 93333-7777", cidade: "Osório", status: "Agendado", data: "2026-09-15", arquivado: false },
   { id: 8, nome: "Rafael Moreira", telefone: "(51) 92222-8888", cidade: "Imbé", status: "Em atendimento", data: "2026-08-30", arquivado: false },
 ];
+const clientes = pacientesIniciais;
+const orcamentos = [];
 
 const agendaInicial = [
   { id: 101, paciente: "Maria Souza", telefone: "(51) 99999-1111", data: "2026-09-18", hora: "09:00", tipo: "Consulta", status: "Agendado", obs: "" },
@@ -1690,7 +1692,7 @@ export default function App() {
     agenda: <Agenda />,
     kanban: <Kanban />,
     pagamentos: <Pagamentos {...props} />,
-    clientes: <Pacientes {...props} />,
+clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
     contatos: <Contatos {...props} />,
     orcamentos: <Orcamentos {...props} />,
     funil: <Funil {...props} />,
