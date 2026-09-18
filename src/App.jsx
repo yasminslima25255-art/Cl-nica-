@@ -1,34 +1,66 @@
 import React, { useState, useEffect, useMemo } from "react";
+
 /* ==========================================================
-   CRM VENDAS — tema preto e dourado
-   Sem dependências externas (só React). Ícones e gráficos
-   são SVG escritos à mão, por isso o projeto instala rápido
-   e não quebra no build do Netlify.
+   CRM VENDAS — versão atualizada
+   - Tema claro/escuro
+   - Contatos funcionando
+   - Edição em contatos, clientes, orçamentos, pagamentos e agenda
+   - WhatsApp em formato de bolinha
+   - Agendamento direto pelo Kanban
+   - Agenda visual estilo Google Calendar
+   - Agendamentos do Kanban aparecem automaticamente na Agenda
+   - Dados persistidos no localStorage
    ========================================================== */
 
-const T = {
-  bg: "#0A0A0B",
-  panel: "#131316",
-  card: "#1A1A1E",
-  cardAlt: "#202026",
-  border: "#2A2A30",
-  borderSoft: "#222228",
-  gold: "#D4A94A",
-  goldLight: "#E8C877",
-  goldDim: "#7A6430",
-  text: "#F2F0EA",
-  textMid: "#B9B6AE",
-  muted: "#83838C",
-  green: "#3FA96B",
-  blue: "#4A7FD4",
-  red: "#C94A4A",
-  orange: "#D4883F",
-  grey: "#4A4A52",
+/* ================== TEMAS ================== */
+
+const TEMAS = {
+  escuro: {
+    bg: "#0A0A0B",
+    panel: "#131316",
+    card: "#1A1A1E",
+    cardAlt: "#202026",
+    border: "#2A2A30",
+    borderSoft: "#222228",
+    gold: "#D4A94A",
+    goldLight: "#E8C877",
+    goldDim: "#7A6430",
+    text: "#F2F0EA",
+    textMid: "#B9B6AE",
+    muted: "#83838C",
+    green: "#3FA96B",
+    blue: "#4A7FD4",
+    red: "#C94A4A",
+    orange: "#D4883F",
+    grey: "#4A4A52",
+    input: "#0F0F12",
+  },
+  claro: {
+    bg: "#F5F5F7",
+    panel: "#FFFFFF",
+    card: "#FFFFFF",
+    cardAlt: "#F0F0F3",
+    border: "#DCDCE2",
+    borderSoft: "#E7E7EB",
+    gold: "#A87813",
+    goldLight: "#C99A31",
+    goldDim: "#D8BD78",
+    text: "#18181B",
+    textMid: "#55555D",
+    muted: "#777780",
+    green: "#27834E",
+    blue: "#3E68B3",
+    red: "#B53C3C",
+    orange: "#B86B29",
+    grey: "#777780",
+    input: "#FAFAFB",
+  },
 };
 
+let T = { ...TEMAS.escuro };
 const FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
-/* ================== ÍCONES (SVG inline) ================== */
+/* ================== ÍCONES ================== */
 
 const ic = (d, extra) => (p) => (
   <svg
@@ -53,67 +85,81 @@ const IconHome = ic(
     <path d="M5 9.5V21h14V9.5" />
   </>
 );
+
 const IconUser = ic(
   <>
     <circle cx="12" cy="8" r="3.5" />
     <path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7" />
   </>
 );
+
 const IconChat = ic(<path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.4-4.6A8 8 0 1 1 21 12Z" />);
+
 const IconDoc = ic(
   <>
     <rect x="4" y="3" width="16" height="18" rx="2" />
     <path d="M8 8h8M8 12h8M8 16h5" />
   </>
 );
+
 const IconFunnel = ic(<path d="M3 4h18l-7 8v8l-4-2v-6L3 4Z" />);
+
 const IconChart = ic(
   <>
     <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
   </>
 );
+
 const IconGear = ic(
   <>
     <circle cx="12" cy="12" r="3" />
     <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
   </>
 );
+
 const IconSearch = ic(
   <>
     <circle cx="11" cy="11" r="7" />
     <path d="m20 20-4.3-4.3" />
   </>
 );
+
 const IconCheck = ic(
   <>
     <circle cx="12" cy="12" r="9" />
     <path d="m8.5 12.5 2.3 2.3 4.7-5" />
   </>
 );
+
 const IconCopy = ic(
   <>
     <rect x="9" y="9" width="11" height="11" rx="2" />
     <path d="M15 5.5A2.5 2.5 0 0 0 12.5 3H6a2 2 0 0 0-2 2v8" />
   </>
 );
+
 const IconPdf = ic(
   <>
     <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9l-6-6Z" />
     <path d="M13 3v6h6" />
   </>
 );
+
 const IconSheet = ic(
   <>
     <rect x="3" y="4" width="18" height="16" rx="2" />
     <path d="M3 10h18M9 4v16M15 4v16" />
   </>
 );
+
 const IconPlus = ic(<path d="M12 5v14M5 12h14" />);
+
 const IconPen = ic(
   <>
     <path d="M16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1 1-4Z" />
   </>
 );
+
 const IconDots = ic(
   <>
     <circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none" />
@@ -121,13 +167,16 @@ const IconDots = ic(
     <circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none" />
   </>
 );
+
 const IconCalendar = ic(
   <>
     <rect x="3.5" y="5" width="17" height="16" rx="2" />
     <path d="M8 3v4M16 3v4M3.5 10h17" />
   </>
 );
+
 const IconArrowUp = ic(<path d="M12 19V5M6 11l6-6 6 6" />);
+
 const IconArchiveBox = ic(
   <>
     <rect x="3" y="4" width="18" height="5" rx="1.5" />
@@ -142,6 +191,7 @@ const IconRestore = ic(
     <path d="M3 4v5h5" />
   </>
 );
+
 const IconTrend = ic(
   <>
     <path d="M3 17l6-6 4 4 8-9" />
@@ -163,7 +213,26 @@ const IconKanban = ic(
     <path d="M8 8v8M12 8v5M16 8v3" />
   </>
 );
-/* Borboleta — usada UMA única vez, apenas na logo */
+
+const IconSun = ic(
+  <>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+  </>
+);
+
+const IconMoon = ic(
+  <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />
+);
+
+const IconX = ic(
+  <>
+    <path d="m6 6 12 12M18 6 6 18" />
+  </>
+);
+
+/* ================== LOGO ================== */
+
 function Butterfly({ size = 13, color = T.gold }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ flexShrink: 0 }}>
@@ -173,7 +242,7 @@ function Butterfly({ size = 13, color = T.gold }) {
   );
 }
 
-/* ================== DADOS DE EXEMPLO ================== */
+/* ================== DADOS ================== */
 
 let proximoId = 1000;
 const gerarId = () => ++proximoId;
@@ -188,8 +257,8 @@ const pacientesIniciais = [
   { id: 7, nome: "Beatriz Rocha", telefone: "(51) 93333-7777", cidade: "Osório", status: "Agendado", data: "2026-09-15", arquivado: false },
   { id: 8, nome: "Rafael Moreira", telefone: "(51) 92222-8888", cidade: "Imbé", status: "Em atendimento", data: "2026-08-30", arquivado: false },
 ];
-const clientes = pacientesIniciais;
-const orcamentos = [];
+
+const orcamentosIniciais = [];
 
 const agendaInicial = [
   { id: 101, paciente: "Maria Souza", telefone: "(51) 99999-1111", data: "2026-09-18", hora: "09:00", tipo: "Consulta", status: "Agendado", obs: "" },
@@ -201,14 +270,14 @@ const agendaInicial = [
 ];
 
 const pagamentosIniciais = [
-  { id: 201, paciente: "Maria Souza", valor: 450, vencimento: "2026-09-10", status: "Pago", forma: "Pix" },
-  { id: 202, paciente: "Ana Paula", valor: 680, vencimento: "2026-09-05", status: "Pago", forma: "Cartão" },
-  { id: 203, paciente: "Beatriz Rocha", valor: 320, vencimento: "2026-09-22", status: "Pendente", forma: "—" },
-  { id: 204, paciente: "Carlos Lima", valor: 900, vencimento: "2026-09-25", status: "Pendente", forma: "—" },
-  { id: 205, paciente: "Rafael Moreira", valor: 250, vencimento: "2026-08-30", status: "Pendente", forma: "—" },
+  { id: 201, cliente: "Maria Souza", telefone: "(51) 99999-1111", descricao: "Consulta", valor: 450, data: "2026-09-10", status: "Pago", forma: "Pix", dataPagamento: "2026-09-10" },
+  { id: 202, cliente: "Ana Paula", telefone: "(51) 95555-5555", descricao: "Consulta", valor: 680, data: "2026-09-05", status: "Pago", forma: "Cartão", dataPagamento: "2026-09-05" },
+  { id: 203, cliente: "Beatriz Rocha", telefone: "(51) 93333-7777", descricao: "Avaliação", valor: 320, data: "2026-09-22", status: "Pendente", forma: "Pix", dataPagamento: null },
+  { id: 204, cliente: "Carlos Lima", telefone: "(51) 98888-2222", descricao: "Consulta", valor: 900, data: "2026-09-25", status: "Pendente", forma: "Pix", dataPagamento: null },
+  { id: 205, cliente: "Rafael Moreira", telefone: "(51) 92222-8888", descricao: "Retorno", valor: 250, data: "2026-08-30", status: "Pendente", forma: "Pix", dataPagamento: null },
 ];
 
-const contatos = [
+const contatosIniciais = [
   { id: 301, nome: "Patrícia Gomes", telefone: "(51) 99111-2233", origem: "WhatsApp", status: "Novo contato", data: "2026-09-17" },
   { id: 302, nome: "Eduardo Nunes", telefone: "(51) 98222-3344", origem: "Instagram", status: "Em atendimento", data: "2026-09-16" },
   { id: 303, nome: "Camila Reis", telefone: "(51) 97333-4455", origem: "Indicação", status: "Retorno agendado", data: "2026-09-14" },
@@ -216,14 +285,26 @@ const contatos = [
   { id: 305, nome: "Larissa Dias", telefone: "(51) 95555-6677", origem: "Ligação", status: "Cliente em potencial", data: "2026-09-05" },
   { id: 306, nome: "Bruno Castro", telefone: "(51) 94666-7788", origem: "WhatsApp", status: "Em retorno", data: "2026-09-01" },
 ];
+
 /* ================== HELPERS ================== */
 
-const brl = (n) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const brl = (n) =>
+  "R$ " +
+  Number(n || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 const dataBR = (iso) => {
+  if (!iso) return "";
   const [a, m, d] = iso.split("-");
   return `${d}/${m}/${a}`;
 };
-/** Guarda o estado no localStorage — os dados não se perdem ao recarregar. */
+
+function hojeISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function useLocalStorage(chave, valorInicial) {
   const [valor, setValor] = useState(() => {
     try {
@@ -233,19 +314,22 @@ function useLocalStorage(chave, valorInicial) {
       return valorInicial;
     }
   });
+
   useEffect(() => {
     try {
       localStorage.setItem(chave, JSON.stringify(valor));
     } catch {}
   }, [chave, valor]);
+
   return [valor, setValor];
-   
 }
-/** Filtra qualquer lista pelo campo `data` (ISO) entre de/até. */
+
 function filtrarPorPeriodo(lista, de, ate) {
   return lista.filter((r) => {
-    if (de && r.data < de) return false;
-    if (ate && r.data > ate) return false;
+    const data = r.data || r.vencimento;
+    if (!data) return true;
+    if (de && data < de) return false;
+    if (ate && data > ate) return false;
     return true;
   });
 }
@@ -260,45 +344,64 @@ function baixarArquivo(nome, conteudo, tipo) {
   URL.revokeObjectURL(url);
 }
 
-/** Exporta para planilha (CSV com ; — abre direto no Excel em pt-BR). */
 function exportarExcel(nomeArquivo, colunas, linhas) {
   const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const csv = [colunas.map(esc).join(";"), ...linhas.map((l) => l.map(esc).join(";"))].join("\r\n");
+  const csv = [
+    colunas.map(esc).join(";"),
+    ...linhas.map((l) => l.map(esc).join(";")),
+  ].join("\r\n");
+
   baixarArquivo(`${nomeArquivo}.csv`, csv, "text/csv;charset=utf-8;");
 }
 
-/** Gera um PDF abrindo a janela de impressão com a tabela formatada. */
 function exportarPDF(titulo, colunas, linhas, periodo) {
   const w = window.open("", "_blank");
   if (!w) return alert("Libere os pop-ups do navegador para gerar o PDF.");
+
   const th = colunas.map((c) => `<th>${c}</th>`).join("");
-  const tr = linhas.map((l) => `<tr>${l.map((c) => `<td>${c ?? ""}</td>`).join("")}</tr>`).join("");
-  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-    <title>${titulo}</title>
-    <style>
-      *{box-sizing:border-box}
-      body{font-family:Inter,Arial,sans-serif;margin:32px;color:#16161a}
-      header{display:flex;align-items:center;gap:10px;border-bottom:2px solid #D4A94A;padding-bottom:12px;margin-bottom:6px}
-      h1{font-size:17px;margin:0;letter-spacing:.06em}
-      .sub{font-size:11px;color:#6b6b73;margin:8px 0 18px}
-      table{width:100%;border-collapse:collapse;font-size:11px}
-      th{background:#16161a;color:#fff;text-align:left;padding:8px 10px;font-weight:600}
-      td{padding:7px 10px;border-bottom:1px solid #e6e6ea}
-      tr:nth-child(even) td{background:#faf9f6}
-      footer{margin-top:20px;font-size:10px;color:#9a9aa2}
-      @media print{@page{margin:14mm}}
-    </style></head><body>
-    <header><h1>CRM VENDAS &middot; ${titulo}</h1></header>
-    <div class="sub">${periodo || "Todos os registros"} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString("pt-BR")}</div>
-    <table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>
-    <footer>${linhas.length} registro(s)</footer>
-    </body></html>`);
+  const tr = linhas
+    .map((l) => `<tr>${l.map((c) => `<td>${c ?? ""}</td>`).join("")}</tr>`)
+    .join("");
+
+  w.document.write(`
+    <!doctype html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="utf-8">
+      <title>${titulo}</title>
+      <style>
+        *{box-sizing:border-box}
+        body{font-family:Arial,sans-serif;margin:32px;color:#16161a}
+        h1{font-size:18px}
+        .sub{font-size:11px;color:#6b6b73;margin:8px 0 18px}
+        table{width:100%;border-collapse:collapse;font-size:11px}
+        th{background:#16161a;color:#fff;text-align:left;padding:8px 10px}
+        td{padding:7px 10px;border-bottom:1px solid #e6e6ea}
+      </style>
+    </head>
+    <body>
+      <h1>CRM VENDAS · ${titulo}</h1>
+      <div class="sub">${periodo || "Todos os registros"} | Gerado em ${new Date().toLocaleString("pt-BR")}</div>
+      <table>
+        <thead><tr>${th}</tr></thead>
+        <tbody>${tr}</tbody>
+      </table>
+    </body>
+    </html>
+  `);
+
   w.document.close();
   w.focus();
   setTimeout(() => w.print(), 350);
 }
 
-/* ================== COMPONENTES BASE ================== */
+function linkWhatsApp(telefone) {
+  const digitos = String(telefone || "").replace(/\D/g, "");
+  if (!digitos) return "#";
+  return `https://wa.me/${digitos.length <= 11 ? "55" + digitos : digitos}`;
+}
+
+/* ================== CHIP ================== */
 
 const CHIP = {
   Cliente: T.green,
@@ -317,7 +420,7 @@ const CHIP = {
   Perdido: T.red,
   "Novo lead": T.blue,
   "Follow up": T.orange,
-  "Agendado": "#8B5FBF",
+  Agendado: "#8B5FBF",
   Paciente: T.green,
   "Sem interesse": T.grey,
   Concluído: T.green,
@@ -326,43 +429,10 @@ const CHIP = {
   Pago: T.green,
 };
 
-/** Monta o link do WhatsApp Web a partir de um telefone brasileiro. */
-function linkWhatsApp(telefone) {
-  const digitos = telefone.replace(/\D/g, "");
-  const comPais = digitos.length <= 11 ? "55" + digitos : digitos;
-  return `https://wa.me/${comPais}`;
-}
-
-function BotaoWhatsApp({ telefone, texto }) {
-  return (
-    
-     <a href={linkWhatsApp(telefone)}
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Abrir no WhatsApp Web"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        background: texto ? T.green + "1A" : "transparent",
-        color: T.green,
-        border: texto ? `1px solid ${T.green}55` : "none",
-        borderRadius: 8,
-        padding: texto ? "8px 13px" : 5,
-        fontSize: 12.5,
-        fontWeight: 600,
-        textDecoration: "none",
-        fontFamily: FONT,
-      }}
-    >
-      <IconChat size={14} />
-      {texto && "WhatsApp"}
-    </a>
-  );
-}
 function Chip({ children }) {
   const cor = CHIP[children] || T.grey;
   const solido = cor === T.green || cor === T.blue || cor === T.red;
+
   return (
     <span
       style={{
@@ -373,7 +443,7 @@ function Chip({ children }) {
         fontWeight: 600,
         whiteSpace: "nowrap",
         background: solido ? cor : cor + "26",
-        color: solido ? "#0C0C0D" : cor,
+        color: solido ? "#fff" : cor,
         border: solido ? "none" : `1px solid ${cor}55`,
       }}
     >
@@ -381,76 +451,69 @@ function Chip({ children }) {
     </span>
   );
 }
-function BotaoAgendarIcon({ onClick, title }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title || "Agendar consulta"}
-      style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}
-    >
-      <IconCalendar size={14} />
-    </button>
-  );
-}
 
-function BotaoArquivarIcon({ onClick, title }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title || "Arquivar"}
-      style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}
-    >
-      <IconArchiveBox size={14} />
-    </button>
-  );
-}
+/* ================== BOTÕES ================== */
 
-function BotaoRestaurarIcon({ onClick, title }) {
+function BotaoWhatsApp({ telefone, pequeno = false }) {
+  if (!telefone) return null;
+
   return (
-    <button
-      onClick={onClick}
-      title={title || "Restaurar"}
-      style={{ background: "none", border: "none", color: T.green, cursor: "pointer", padding: 5, display: "flex" }}
-    >
-      <IconRestore size={14} />
-    </button>
-  );
-}
-function Panel({ children, style, pad = 20 }) {
-  return (
-    <div
+    <a
+      href={linkWhatsApp(telefone)}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Abrir WhatsApp"
       style={{
-        background: T.card,
-        border: `1px solid ${T.borderSoft}`,
-        borderRadius: 12,
-        padding: pad,
-        ...style,
+        width: pequeno ? 29 : 34,
+        height: pequeno ? 29 : 34,
+        borderRadius: "50%",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: T.green + "18",
+        color: T.green,
+        border: `1px solid ${T.green}55`,
+        textDecoration: "none",
+        flexShrink: 0,
       }}
     >
-      {children}
-    </div>
+      <IconChat size={pequeno ? 14 : 16} />
+    </a>
   );
 }
 
-function PageHead({ titulo, sub, acao }) {
-  return (
-    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 700, color: T.text, letterSpacing: "-0.02em" }}>{titulo}</h1>
-        {sub && <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{sub}</div>}
-      </div>
-      {acao}
-    </div>
-  );
-}
-
-function GoldButton({ children, onClick, icon: Ic }) {
+function BotaoAgendarIcon({ onClick, title = "Agendar" }) {
   return (
     <button
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 34,
+        height: 34,
+        borderRadius: "50%",
+        background: T.gold + "18",
+        border: `1px solid ${T.gold}55`,
+        color: T.gold,
+        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <IconCalendar size={15} />
+    </button>
+  );
+}
+
+function GoldButton({ children, onClick, icon: Ic, type = "button" }) {
+  return (
+    <button
+      type={type}
       onClick={onClick}
       style={{
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: 7,
         background: T.gold,
         color: "#14120A",
@@ -477,6 +540,7 @@ function GhostButton({ children, onClick, icon: Ic, title }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
+        justifyContent: "center",
         gap: 7,
         background: T.cardAlt,
         color: T.textMid,
@@ -495,9 +559,32 @@ function GhostButton({ children, onClick, icon: Ic, title }) {
   );
 }
 
-/** Botão de copiar — usado em cada linha e no topo das tabelas. */
+function IconButton({ children, onClick, title, danger = false }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 32,
+        height: 32,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 7,
+        background: "transparent",
+        border: `1px solid ${danger ? T.red + "55" : T.border}`,
+        color: danger ? T.red : T.muted,
+        cursor: "pointer",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function CopyButton({ texto, label, title }) {
   const [ok, setOk] = useState(false);
+
   function copiar() {
     const fallback = () => {
       const ta = document.createElement("textarea");
@@ -509,21 +596,28 @@ function CopyButton({ texto, label, title }) {
       document.execCommand("copy");
       document.body.removeChild(ta);
     };
+
     const done = () => {
       setOk(true);
       setTimeout(() => setOk(false), 1400);
     };
+
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(texto).then(done).catch(() => {
-        fallback();
-        done();
-      });
+      navigator.clipboard
+        .writeText(texto)
+        .then(done)
+        .catch(() => {
+          fallback();
+          done();
+        });
     } else {
       fallback();
       done();
     }
   }
+
   const Ic = ok ? IconCheck : IconCopy;
+
   return (
     <button
       onClick={copiar}
@@ -549,8 +643,10 @@ function CopyButton({ texto, label, title }) {
   );
 }
 
+/* ================== BASE ================== */
+
 const inputBase = {
-  background: T.panel,
+  background: T.input,
   border: `1px solid ${T.border}`,
   borderRadius: 8,
   color: T.text,
@@ -560,17 +656,82 @@ const inputBase = {
   outline: "none",
 };
 
+function Panel({ children, style, pad = 20 }) {
+  return (
+    <div
+      style={{
+        background: T.card,
+        border: `1px solid ${T.borderSoft}`,
+        borderRadius: 12,
+        padding: pad,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PageHead({ titulo, sub, acao }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        gap: 16,
+        marginBottom: 18,
+        flexWrap: "wrap",
+      }}
+    >
+      <div>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 26,
+            fontWeight: 700,
+            color: T.text,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {titulo}
+        </h1>
+        {sub && (
+          <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>
+            {sub}
+          </div>
+        )}
+      </div>
+      {acao}
+    </div>
+  );
+}
+
 function SearchInput({ value, onChange, placeholder }) {
   return (
     <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
-      <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: T.muted, display: "flex" }}>
+      <span
+        style={{
+          position: "absolute",
+          left: 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          color: T.muted,
+          display: "flex",
+        }}
+      >
         <IconSearch size={15} />
       </span>
+
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        style={{ ...inputBase, width: "100%", paddingLeft: 36 }}
+        style={{
+          ...inputBase,
+          width: "100%",
+          paddingLeft: 36,
+        }}
       />
     </div>
   );
@@ -578,9 +739,17 @@ function SearchInput({ value, onChange, placeholder }) {
 
 function Select({ value, onChange, options }) {
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...inputBase, minWidth: 140, cursor: "pointer" }}>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      style={{
+        ...inputBase,
+        minWidth: 140,
+        cursor: "pointer",
+      }}
+    >
       {options.map((o) => (
-        <option key={o} value={o} style={{ background: T.panel }}>
+        <option key={o} value={o}>
           {o}
         </option>
       ))}
@@ -588,7 +757,6 @@ function Select({ value, onChange, options }) {
   );
 }
 
-/** Filtro de data: de tal data até tal data. */
 function DateRange({ de, ate, setDe, setAte }) {
   return (
     <div
@@ -596,34 +764,57 @@ function DateRange({ de, ate, setDe, setAte }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 8,
-        background: T.panel,
+        background: T.input,
         border: `1px solid ${T.border}`,
         borderRadius: 8,
         padding: "5px 10px",
       }}
     >
       <IconCalendar size={14} color={T.gold} />
+
       <input
         type="date"
         value={de}
         onChange={(e) => setDe(e.target.value)}
-        style={{ ...inputBase, border: "none", background: "transparent", padding: "4px 2px", colorScheme: "dark", width: 126 }}
+        style={{
+          ...inputBase,
+          border: "none",
+          background: "transparent",
+          padding: "4px 2px",
+          colorScheme: T === TEMAS.escuro ? "dark" : "light",
+          width: 126,
+        }}
       />
+
       <span style={{ color: T.muted, fontSize: 12 }}>até</span>
+
       <input
         type="date"
         value={ate}
         onChange={(e) => setAte(e.target.value)}
-        style={{ ...inputBase, border: "none", background: "transparent", padding: "4px 2px", colorScheme: "dark", width: 126 }}
+        style={{
+          ...inputBase,
+          border: "none",
+          background: "transparent",
+          padding: "4px 2px",
+          colorScheme: T === TEMAS.escuro ? "dark" : "light",
+          width: 126,
+        }}
       />
+
       {(de || ate) && (
         <button
           onClick={() => {
             setDe("");
             setAte("");
           }}
-          title="Limpar período"
-          style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 2px" }}
+          style={{
+            background: "none",
+            border: "none",
+            color: T.muted,
+            cursor: "pointer",
+            fontSize: 16,
+          }}
         >
           ×
         </button>
@@ -632,25 +823,19 @@ function DateRange({ de, ate, setDe, setAte }) {
   );
 }
 
-/** Barra de ações: exportar PDF, exportar planilha e copiar tudo. */
-function ExportBar({ titulo, colunas, linhas, periodo }) {
-  const textoTudo = [colunas.join("\t"), ...linhas.map((l) => l.join("\t"))].join("\n");
-  return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-      <GhostButton icon={IconPdf} onClick={() => exportarPDF(titulo, colunas, linhas, periodo)}>
-        PDF
-      </GhostButton>
-      <GhostButton icon={IconSheet} onClick={() => exportarExcel(titulo.toLowerCase().replace(/\s+/g, "-"), colunas, linhas)}>
-        Planilha
-      </GhostButton>
-      <CopyButton texto={textoTudo} label="Copiar tabela" title="Copiar todos os dados visíveis" />
-    </div>
-  );
-}
-
 function Toolbar({ children }) {
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 14 }}>{children}</div>
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        flexWrap: "wrap",
+        alignItems: "center",
+        marginBottom: 14,
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -658,7 +843,14 @@ function Table({ head, children, vazio }) {
   return (
     <Panel pad={0} style={{ overflow: "hidden" }}>
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 700 }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: 13,
+            minWidth: 700,
+          }}
+        >
           <thead>
             <tr>
               {head.map((h, i) => (
@@ -683,135 +875,146 @@ function Table({ head, children, vazio }) {
           <tbody>{children}</tbody>
         </table>
       </div>
+
       {vazio && (
-        <div style={{ padding: "34px 20px", textAlign: "center", color: T.muted, fontSize: 13 }}>
-          Nenhum registro no período selecionado. Ajuste as datas ou limpe o filtro.
+        <div
+          style={{
+            padding: "34px 20px",
+            textAlign: "center",
+            color: T.muted,
+            fontSize: 13,
+          }}
+        >
+          Nenhum registro encontrado.
         </div>
       )}
     </Panel>
   );
 }
 
-const td = { padding: "13px 18px", borderBottom: `1px solid ${T.borderSoft}`, color: T.textMid, whiteSpace: "nowrap" };
+const td = {
+  padding: "13px 18px",
+  borderBottom: `1px solid ${T.borderSoft}`,
+  color: T.textMid,
+  whiteSpace: "nowrap",
+};
 
-function RowActions({ textoCopia }) {
+function Rodape({ n, total }) {
   return (
-    <td style={{ ...td, textAlign: "right" }}>
-      <span style={{ display: "inline-flex", gap: 2, alignItems: "center" }}>
-        <CopyButton texto={textoCopia} title="Copiar dados deste registro" />
-        <button style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }} title="Editar">
-          <IconPen size={14} />
-        </button>
-        <button style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }} title="Mais">
-          <IconDots size={14} />
-        </button>
-      </span>
-    </td>
-  );
-}
-
-       /* ================== GRÁFICOS (SVG) ================== */
-
-function Donut({ dados, total, legendaCentro }) {
-  const R = 52, SW = 16, C = 2 * Math.PI * R;
-  let acc = 0;
-  const soma = dados.reduce((s, d) => s + d.valor, 0) || 1;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 26, flexWrap: "wrap" }}>
-      <svg width={140} height={140} viewBox="0 0 140 140">
-        <circle cx="70" cy="70" r={R} fill="none" stroke={T.cardAlt} strokeWidth={SW} />
-        {dados.map((d, i) => {
-          const frac = d.valor / soma;
-          const el = (
-            <circle
-              key={i}
-              cx="70"
-              cy="70"
-              r={R}
-              fill="none"
-              stroke={d.cor}
-              strokeWidth={SW}
-              strokeDasharray={`${C * frac} ${C}`}
-              strokeDashoffset={-C * acc}
-              transform="rotate(-90 70 70)"
-              strokeLinecap="butt"
-            />
-          );
-          acc += frac;
-          return el;
-        })}
-        <text x="70" y="66" textAnchor="middle" fill={T.text} fontSize="24" fontWeight="700" fontFamily={FONT}>
-          {total}
-        </text>
-        <text x="70" y="83" textAnchor="middle" fill={T.muted} fontSize="10.5" fontFamily={FONT}>
-          {legendaCentro}
-        </text>
-      </svg>
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1, minWidth: 170 }}>
-        {dados.map((d, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 12.5 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: d.cor, flexShrink: 0 }} />
-            <span style={{ color: T.textMid, flex: 1 }}>{d.rotulo}</span>
-            <span style={{ color: T.text, fontWeight: 600, width: 22, textAlign: "right" }}>{d.valor}</span>
-            <span style={{ color: T.muted, width: 38, textAlign: "right" }}>{Math.round((d.valor / soma) * 100)}%</span>
-          </div>
-        ))}
-      </div>
+    <div style={{ marginTop: 12, fontSize: 12.5, color: T.muted }}>
+      Mostrando {n} de {total} registros
     </div>
   );
 }
 
-function Bars({ dados, altura = 150 }) {
-  const max = Math.max(...dados.map((d) => d.valor), 1);
+function ExportBar({ titulo, colunas, linhas, periodo }) {
+  const textoTudo = [
+    colunas.join("\t"),
+    ...linhas.map((l) => l.join("\t")),
+  ].join("\n");
+
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: altura, marginTop: 8 }}>
-      {dados.map((d, i) => (
-        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }} title={`Dia ${d.rotulo}: ${brl(d.valor)}`}>
-          <div
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <GhostButton
+        icon={IconPdf}
+        onClick={() => exportarPDF(titulo, colunas, linhas, periodo)}
+      >
+        PDF
+      </GhostButton>
+
+      <GhostButton
+        icon={IconSheet}
+        onClick={() =>
+          exportarExcel(
+            titulo.toLowerCase().replace(/\s+/g, "-"),
+            colunas,
+            linhas
+          )
+        }
+      >
+        Planilha
+      </GhostButton>
+
+      <CopyButton texto={textoTudo} label="Copiar tabela" />
+    </div>
+  );
+}
+
+/* ==========================================================
+   MODAL DE EDIÇÃO
+   ========================================================== */
+
+function Modal({ titulo, children, onClose, largura = 600 }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,.62)",
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: largura,
+          maxHeight: "90vh",
+          overflowY: "auto",
+          background: T.card,
+          border: `1px solid ${T.border}`,
+          borderRadius: 14,
+          boxShadow: "0 25px 80px rgba(0,0,0,.35)",
+        }}
+      >
+        <div
+          style={{
+            padding: "16px 18px",
+            borderBottom: `1px solid ${T.borderSoft}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <strong style={{ color: T.text, fontSize: 16 }}>{titulo}</strong>
+
+          <button
+            onClick={onClose}
             style={{
-              width: "100%",
-              height: `${(d.valor / max) * 100}%`,
-              minHeight: 3,
-              background: d.destaque ? T.gold : T.goldDim,
-              borderRadius: "3px 3px 0 0",
+              background: "none",
+              border: "none",
+              color: T.muted,
+              cursor: "pointer",
             }}
-          />
-          <span style={{ fontSize: 9.5, color: T.muted }}>{i % 5 === 0 ? d.rotulo : ""}</span>
+          >
+            <IconX size={18} />
+          </button>
         </div>
-      ))}
-    </div>
-  );
-}
 
-function Gauge({ pct, titulo, sub }) {
-  const R = 46, C = 2 * Math.PI * R;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-      <svg width={116} height={116} viewBox="0 0 116 116">
-        <circle cx="58" cy="58" r={R} fill="none" stroke={T.cardAlt} strokeWidth={13} />
-        <circle
-          cx="58"
-          cy="58"
-          r={R}
-          fill="none"
-          stroke={T.gold}
-          strokeWidth={13}
-          strokeDasharray={`${(C * pct) / 100} ${C}`}
-          strokeDashoffset={0}
-          transform="rotate(-90 58 58)"
-          strokeLinecap="round"
-        />
-        <text x="58" y="64" textAnchor="middle" fill={T.text} fontSize="21" fontWeight="700" fontFamily={FONT}>
-          {pct}%
-        </text>
-      </svg>
-      <div style={{ flex: 1, minWidth: 130 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>{titulo}</div>
-        <div style={{ fontSize: 12, color: T.muted, marginTop: 3 }}>{sub}</div>
+        <div style={{ padding: 18 }}>{children}</div>
       </div>
     </div>
   );
 }
+
+function Campo({ label, children }) {
+  return (
+    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <span style={{ fontSize: 11.5, color: T.muted }}>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+/* ==========================================================
+   INÍCIO
+   ========================================================== */
 
 function StatCard({ rotulo, valor, delta, icon: Ic }) {
   return (
@@ -831,12 +1034,31 @@ function StatCard({ rotulo, valor, delta, icon: Ic }) {
         >
           <Ic size={17} />
         </span>
-        <span style={{ fontSize: 12.5, color: T.muted, fontWeight: 500 }}>{rotulo}</span>
+
+        <span style={{ fontSize: 12.5, color: T.muted }}>
+          {rotulo}
+        </span>
+
         <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
-          <span style={{ fontSize: 28, fontWeight: 700, color: T.text, letterSpacing: "-0.03em" }}>{valor}</span>
+          <span
+            style={{
+              fontSize: 28,
+              fontWeight: 700,
+              color: T.text,
+            }}
+          >
+            {valor}
+          </span>
+
           {delta && (
-            <span style={{ fontSize: 12, color: T.green, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 2 }}>
-              <IconArrowUp size={11} sw={2.6} /> {delta}
+            <span
+              style={{
+                fontSize: 12,
+                color: T.green,
+                fontWeight: 600,
+              }}
+            >
+              <IconArrowUp size={11} /> {delta}
             </span>
           )}
         </div>
@@ -845,687 +1067,1990 @@ function StatCard({ rotulo, valor, delta, icon: Ic }) {
   );
 }
 
-/* ================== TELAS ================== */
-
-function Inicio({ de, ate, setDe, setAte }) {
-  const cli = filtrarPorPeriodo(clientes, de, ate);
-  const orc = filtrarPorPeriodo(orcamentos, de, ate);
-  const fechadas = orc.filter((o) => o.status === "Aprovado").length;
-  const negoc = cli.filter((c) => c.status === "Em negociação").length + orc.filter((o) => o.status === "Em negociação").length;
-  const proposta = cli.filter((c) => c.status === "Proposta").length;
-  const semRetorno = cli.filter((c) => c.status === "Sem retorno").length;
-  const meta = 20;
+function Donut({ dados, total, legendaCentro }) {
+  const R = 52;
+  const SW = 16;
+  const C = 2 * Math.PI * R;
+  let acc = 0;
+  const soma = dados.reduce((s, d) => s + d.valor, 0) || 1;
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 30, fontWeight: 700, color: T.text, letterSpacing: "-0.03em" }}>Olá, Yasmin!</h1>
-          <div style={{ fontSize: 13.5, color: T.muted, marginTop: 5 }}>Aqui está um resumo do seu dia.</div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-end" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, color: T.textMid }}>
-            <IconCalendar size={15} color={T.gold} />
-            {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
-          </span>
-          <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        </div>
-      </div>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 26,
+        flexWrap: "wrap",
+      }}
+    >
+      <svg width={140} height={140} viewBox="0 0 140 140">
+        <circle
+          cx="70"
+          cy="70"
+          r={R}
+          fill="none"
+          stroke={T.cardAlt}
+          strokeWidth={SW}
+        />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 16 }}>
-        <StatCard rotulo="Total de clientes" valor={cli.length} delta="12%" icon={IconUser} />
-        <StatCard rotulo="Em atendimento" valor={negoc} delta="3%" icon={IconChat} />
-        <StatCard rotulo="Orçamentos enviados" valor={orc.length} delta="25%" icon={IconDoc} />
-        <StatCard rotulo="Vendas fechadas" valor={fechadas} delta="50%" icon={IconCheck} />
-      </div>
+        {dados.map((d, i) => {
+          const frac = d.valor / soma;
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: 14 }}>
-        <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 18 }}>Resumo de vendas</div>
-          <Donut
-            total={fechadas}
-            legendaCentro="fechadas"
-            dados={[
-              { rotulo: "Fechadas", valor: fechadas, cor: T.gold },
-              { rotulo: "Em negociação", valor: negoc, cor: T.goldDim },
-              { rotulo: "Proposta", valor: proposta, cor: "#5A5A62" },
-              { rotulo: "Sem retorno", valor: semRetorno, cor: "#33333A" },
-            ]}
-          />
-        </Panel>
+          const el = (
+            <circle
+              key={i}
+              cx="70"
+              cy="70"
+              r={R}
+              fill="none"
+              stroke={d.cor}
+              strokeWidth={SW}
+              strokeDasharray={`${C * frac} ${C}`}
+              strokeDashoffset={-C * acc}
+              transform="rotate(-90 70 70)"
+            />
+          );
 
-        <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 18 }}>Meta do mês</div>
-          <div style={{ height: 9, background: T.cardAlt, borderRadius: 999, overflow: "hidden", marginBottom: 10 }}>
-            <div style={{ width: `${Math.min((fechadas / meta) * 100, 100)}%`, height: "100%", background: T.gold, borderRadius: 999 }} />
+          acc += frac;
+          return el;
+        })}
+
+        <text
+          x="70"
+          y="66"
+          textAnchor="middle"
+          fill={T.text}
+          fontSize="24"
+          fontWeight="700"
+          fontFamily={FONT}
+        >
+          {total}
+        </text>
+
+        <text
+          x="70"
+          y="83"
+          textAnchor="middle"
+          fill={T.muted}
+          fontSize="10.5"
+          fontFamily={FONT}
+        >
+          {legendaCentro}
+        </text>
+      </svg>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {dados.map((d, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              fontSize: 12.5,
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 999,
+                background: d.cor,
+              }}
+            />
+
+            <span style={{ color: T.textMid }}>{d.rotulo}</span>
+            <strong style={{ color: T.text }}>{d.valor}</strong>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textMid, paddingBottom: 18, borderBottom: `1px solid ${T.borderSoft}` }}>
-            <span>
-              {fechadas} / {meta} vendas
-            </span>
-            <span style={{ color: T.gold, fontWeight: 600 }}>{Math.round((fechadas / meta) * 100)}%</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 18 }}>
-            <Butterfly size={24} />
-            <div style={{ fontSize: 16, fontWeight: 600, color: T.text, lineHeight: 1.35 }}>
-              Disciplina hoje,
-              <br />
-              vendas amanhã.
-            </div>
-          </div>
-        </Panel>
+        ))}
       </div>
     </div>
   );
 }
 
+function Inicio({ de, ate, setDe, setAte }) {
+  const [clientes] = useLocalStorage("crm_pacientes", pacientesIniciais);
+  const [orcamentos] = useLocalStorage("crm_orcamentos", orcamentosIniciais);
+
+  const cli = filtrarPorPeriodo(clientes, de, ate);
+  const orc = filtrarPorPeriodo(orcamentos, de, ate);
+
+  const fechadas = orc.filter((o) => o.status === "Aprovado").length;
+  const negoc =
+    cli.filter((c) => c.status === "Em atendimento").length +
+    orc.filter((o) => o.status === "Em negociação").length;
+
+  return (
+    <div>
+      <PageHead
+        titulo="Olá, Yasmin!"
+        sub="Aqui está um resumo do seu dia."
+        acao={
+          <DateRange
+            de={de}
+            ate={ate}
+            setDe={setDe}
+            setAte={setAte}
+          />
+        }
+      />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))",
+          gap: 14,
+          marginBottom: 16,
+        }}
+      >
+        <StatCard rotulo="Total de clientes" valor={cli.length} icon={IconUser} />
+        <StatCard rotulo="Em atendimento" valor={negoc} icon={IconChat} />
+        <StatCard rotulo="Orçamentos enviados" valor={orc.length} icon={IconDoc} />
+        <StatCard rotulo="Vendas fechadas" valor={fechadas} icon={IconCheck} />
+      </div>
+
+      <Panel>
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: T.text,
+            marginBottom: 18,
+          }}
+        >
+          Resumo de vendas
+        </div>
+
+        <Donut
+          total={fechadas}
+          legendaCentro="fechadas"
+          dados={[
+            { rotulo: "Fechadas", valor: fechadas, cor: T.gold },
+            { rotulo: "Em atendimento", valor: negoc, cor: T.blue },
+            {
+              rotulo: "Outros",
+              valor: Math.max(cli.length - negoc, 0),
+              cor: T.grey,
+            },
+          ]}
+        />
+      </Panel>
+    </div>
+  );
+}
+
+/* ==========================================================
+   CLIENTES
+   ========================================================== */
+
 function Pacientes({ de, ate, setDe, setAte }) {
-  const [pacientes, setPacientes] = useLocalStorage("crm_pacientes", pacientesIniciais);
+  const [pacientes, setPacientes] = useLocalStorage(
+    "crm_pacientes",
+    pacientesIniciais
+  );
+
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
   const [verArquivados, setVerArquivados] = useState(false);
-
-  const base = pacientes.filter((p) => (verArquivados ? p.arquivado : !p.arquivado));
+  const [editando, setEditando] = useState(null);
 
   function novoPaciente() {
-    const nome = prompt("Nome do cliente:");
-    if (!nome) return;
-    const telefone = prompt("WhatsApp/telefone:") || "";
-    const cidade = prompt("Cidade:") || "";
-    const novo = {
-      id: gerarId(),
-      nome,
-      telefone,
-      cidade,
+    setEditando({
+      id: null,
+      nome: "",
+      telefone: "",
+      cidade: "",
       status: "Novo lead",
-      data: new Date().toISOString().slice(0, 10),
+      data: hojeISO(),
       arquivado: false,
-    };
-    setPacientes((lista) => [...lista, novo]);
+    });
   }
 
-  function editarPaciente(paciente) {
-    const nome = prompt("Nome do cliente:", paciente.nome);
-    if (!nome) return;
-    const telefone = prompt("WhatsApp/telefone:", paciente.telefone) || "";
-    const cidade = prompt("Cidade:", paciente.cidade) || "";
-    const statusNovo = prompt(
-      "Status:",
-      paciente.status
-    ) || paciente.status;
+  function salvar() {
+    if (!editando.nome.trim()) {
+      alert("Informe o nome.");
+      return;
+    }
 
-    setPacientes((lista) => lista.map((p) =>
-      p.id === paciente.id
-        ? { ...p, nome, telefone, cidade, status: statusNovo, data: new Date().toISOString().slice(0, 10) }
-        : p
-    ));
-  }
+    if (editando.id) {
+      setPacientes((lista) =>
+        lista.map((p) =>
+          p.id === editando.id
+            ? { ...editando, data: hojeISO() }
+            : p
+        )
+      );
+    } else {
+      setPacientes((lista) => [
+        ...lista,
+        {
+          ...editando,
+          id: gerarId(),
+          data: hojeISO(),
+        },
+      ]);
+    }
 
-  function arquivarPaciente(id) {
-    setPacientes((lista) => lista.map((p) => p.id === id ? { ...p, arquivado: true } : p));
-  }
-
-  function restaurarPaciente(id) {
-    setPacientes((lista) => lista.map((p) => p.id === id ? { ...p, arquivado: false } : p));
+    setEditando(null);
   }
 
   const dados = useMemo(() => {
-    let l = filtrarPorPeriodo(base, de, ate);
-    if (status !== "Todos") l = l.filter((c) => c.status === status);
+    let l = pacientes.filter((p) =>
+      verArquivados ? p.arquivado : !p.arquivado
+    );
+
+    l = filtrarPorPeriodo(l, de, ate);
+
+    if (status !== "Todos") {
+      l = l.filter((c) => c.status === status);
+    }
+
     const q = busca.trim().toLowerCase();
-    if (q) l = l.filter((c) => [c.nome, c.telefone, c.cidade].join(" ").toLowerCase().includes(q));
+
+    if (q) {
+      l = l.filter((c) =>
+        [c.nome, c.telefone, c.cidade]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
     return l;
   }, [pacientes, busca, status, de, ate, verArquivados]);
-
-  const colunas = ["Nome", "Telefone", "Cidade", "Status", "Último contato"];
-  const linhas = dados.map((c) => [c.nome, c.telefone, c.cidade, c.status, dataBR(c.data)]);
-  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
 
   return (
     <div>
       <PageHead
         titulo="Clientes"
-        sub="Gerencie seus clientes e acompanhe o histórico de cada um."
+        sub="Gerencie seus clientes."
         acao={
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <GhostButton icon={verArquivados ? IconRestore : IconArchiveBox} onClick={() => setVerArquivados((v) => !v)}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <GhostButton
+              icon={verArquivados ? IconRestore : IconArchiveBox}
+              onClick={() => setVerArquivados((v) => !v)}
+            >
               {verArquivados ? "Ver ativos" : "Ver arquivados"}
             </GhostButton>
-            <GoldButton icon={IconPlus} onClick={novoPaciente}>Novo cliente</GoldButton>
+
+            <GoldButton icon={IconPlus} onClick={novoPaciente}>
+              Novo cliente
+            </GoldButton>
           </div>
         }
       />
+
       <Toolbar>
-        <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por nome, telefone ou cidade..." />
-        <Select value={status} onChange={setStatus} options={["Todos", "Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"]} />
-        <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Clientes" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <SearchInput
+          value={busca}
+          onChange={setBusca}
+          placeholder="Buscar cliente..."
+        />
+
+        <Select
+          value={status}
+          onChange={setStatus}
+          options={[
+            "Todos",
+            "Novo lead",
+            "Em atendimento",
+            "Follow up",
+            "Agendado",
+            "Paciente",
+            "Sem interesse",
+          ]}
+        />
+
+        <DateRange
+          de={de}
+          ate={ate}
+          setDe={setDe}
+          setAte={setAte}
+        />
       </Toolbar>
-      <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
+
+      <Table
+        head={[
+          "Nome",
+          "Telefone",
+          "Cidade",
+          "Status",
+          "Último contato",
+          "Ações",
+        ]}
+        vazio={!dados.length}
+      >
         {dados.map((c) => (
           <tr key={c.id}>
-            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.nome}</td>
+            <td style={{ ...td, color: T.text, fontWeight: 600 }}>
+              {c.nome}
+            </td>
+
             <td style={td}>{c.telefone}</td>
             <td style={td}>{c.cidade}</td>
-            <td style={td}><Chip>{c.status}</Chip></td>
+            <td style={td}>
+              <Chip>{c.status}</Chip>
+            </td>
             <td style={td}>{dataBR(c.data)}</td>
+
             <td style={{ ...td, textAlign: "right" }}>
-              <span style={{ display: "inline-flex", gap: 2, alignItems: "center" }}>
-                <CopyButton texto={`${c.nome}
-${c.telefone}
-${c.cidade}
-Status: ${c.status}
-Último contato: ${dataBR(c.data)}`} title="Copiar dados deste cliente" />
-                <BotaoWhatsApp telefone={c.telefone} texto />
-                <button onClick={() => editarPaciente(c)} title="Editar cliente" style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  gap: 5,
+                  alignItems: "center",
+                }}
+              >
+                <BotaoWhatsApp telefone={c.telefone} pequeno />
+
+                <BotaoAgendarIcon
+                  title="Agendar atendimento"
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent("crm-agendar", {
+                        detail: {
+                          cliente: c.nome,
+                          telefone: c.telefone,
+                        },
+                      })
+                    );
+                  }}
+                />
+
+                <IconButton
+                  title="Editar cliente"
+                  onClick={() => setEditando({ ...c })}
+                >
                   <IconPen size={14} />
-                </button>
-                {verArquivados ? (
-                  <BotaoRestaurarIcon onClick={() => restaurarPaciente(c.id)} />
-                ) : (
-                  <BotaoArquivarIcon onClick={() => arquivarPaciente(c.id)} />
-                )}
+                </IconButton>
+
+                <IconButton
+                  danger
+                  title={verArquivados ? "Restaurar" : "Arquivar"}
+                  onClick={() =>
+                    setPacientes((lista) =>
+                      lista.map((p) =>
+                        p.id === c.id
+                          ? { ...p, arquivado: !p.arquivado }
+                          : p
+                      )
+                    )
+                  }
+                >
+                  {verArquivados ? (
+                    <IconRestore size={14} />
+                  ) : (
+                    <IconArchiveBox size={14} />
+                  )}
+                </IconButton>
               </span>
             </td>
           </tr>
         ))}
       </Table>
-      <Rodape n={dados.length} total={base.length} />
+
+      <Rodape n={dados.length} total={pacientes.length} />
+
+      {editando && (
+        <Modal
+          titulo={editando.id ? "Editar cliente" : "Novo cliente"}
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Nome">
+              <input
+                style={inputBase}
+                value={editando.nome}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    nome: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Telefone / WhatsApp">
+              <input
+                style={inputBase}
+                value={editando.telefone}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    telefone: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Cidade">
+              <input
+                style={inputBase}
+                value={editando.cidade}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    cidade: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Status">
+              <Select
+                value={editando.status}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    status: v,
+                  })
+                }
+                options={[
+                  "Novo lead",
+                  "Em atendimento",
+                  "Follow up",
+                  "Agendado",
+                  "Paciente",
+                  "Sem interesse",
+                ]}
+              />
+            </Campo>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+              marginTop: 18,
+            }}
+          >
+            <GhostButton onClick={() => setEditando(null)}>
+              Cancelar
+            </GhostButton>
+
+            <GoldButton onClick={salvar}>
+              Salvar alterações
+            </GoldButton>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
+/* ==========================================================
+   CONTATOS — BOTÃO AGORA FUNCIONA
+   ========================================================== */
+
 function Contatos({ de, ate, setDe, setAte }) {
+  const [contatos, setContatos] = useLocalStorage(
+    "crm_contatos",
+    contatosIniciais
+  );
+
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
   const [origem, setOrigem] = useState("Todas as origens");
+  const [editando, setEditando] = useState(null);
+
+  function novoContato() {
+    setEditando({
+      id: null,
+      nome: "",
+      telefone: "",
+      origem: "WhatsApp",
+      status: "Novo contato",
+      data: hojeISO(),
+    });
+  }
+
+  function salvarContato() {
+    if (!editando.nome.trim()) {
+      alert("Informe o nome.");
+      return;
+    }
+
+    if (editando.id) {
+      setContatos((lista) =>
+        lista.map((c) =>
+          c.id === editando.id ? editando : c
+        )
+      );
+    } else {
+      setContatos((lista) => [
+        ...lista,
+        {
+          ...editando,
+          id: gerarId(),
+          data: hojeISO(),
+        },
+      ]);
+    }
+
+    setEditando(null);
+  }
 
   const dados = useMemo(() => {
     let l = filtrarPorPeriodo(contatos, de, ate);
-    if (status !== "Todos") l = l.filter((c) => c.status === status);
-    if (origem !== "Todas as origens") l = l.filter((c) => c.origem === origem);
-    const q = busca.trim().toLowerCase();
-    if (q) l = l.filter((c) => [c.nome, c.telefone, c.origem].join(" ").toLowerCase().includes(q));
-    return l;
-  }, [busca, status, origem, de, ate]);
 
-  const colunas = ["Nome", "Telefone", "Origem", "Status", "Data"];
-  const linhas = dados.map((c) => [c.nome, c.telefone, c.origem, c.status, dataBR(c.data)]);
-  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
+    if (status !== "Todos") {
+      l = l.filter((c) => c.status === status);
+    }
+
+    if (origem !== "Todas as origens") {
+      l = l.filter((c) => c.origem === origem);
+    }
+
+    const q = busca.trim().toLowerCase();
+
+    if (q) {
+      l = l.filter((c) =>
+        [c.nome, c.telefone, c.origem]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
+    return l;
+  }, [contatos, busca, status, origem, de, ate]);
 
   return (
     <div>
-      <PageHead titulo="Contatos" sub="Todos os seus contatos em um só lugar." acao={<GoldButton icon={IconPlus}>Novo contato</GoldButton>} />
+      <PageHead
+        titulo="Contatos"
+        sub="Todos os seus contatos em um só lugar."
+        acao={
+          <GoldButton icon={IconPlus} onClick={novoContato}>
+            Novo contato
+          </GoldButton>
+        }
+      />
+
       <Toolbar>
-        <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por nome, telefone ou origem..." />
-        <Select value={status} onChange={setStatus} options={["Todos", "Novo contato", "Em atendimento", "Retorno agendado", "Orçamento enviado", "Cliente em potencial", "Em retorno"]} />
-        <Select value={origem} onChange={setOrigem} options={["Todas as origens", "WhatsApp", "Instagram", "Ligação", "Site", "Indicação"]} />
-        <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Contatos" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <SearchInput
+          value={busca}
+          onChange={setBusca}
+          placeholder="Buscar por nome, telefone ou origem..."
+        />
+
+        <Select
+          value={status}
+          onChange={setStatus}
+          options={[
+            "Todos",
+            "Novo contato",
+            "Em atendimento",
+            "Retorno agendado",
+            "Orçamento enviado",
+            "Cliente em potencial",
+            "Em retorno",
+          ]}
+        />
+
+        <Select
+          value={origem}
+          onChange={setOrigem}
+          options={[
+            "Todas as origens",
+            "WhatsApp",
+            "Instagram",
+            "Ligação",
+            "Site",
+            "Indicação",
+          ]}
+        />
+
+        <DateRange
+          de={de}
+          ate={ate}
+          setDe={setDe}
+          setAte={setAte}
+        />
       </Toolbar>
-      <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
-        {dados.map((c, i) => (
-          <tr key={i}>
-            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.nome}</td>
+
+      <Table
+        head={[
+          "Nome",
+          "Telefone",
+          "Origem",
+          "Status",
+          "Data",
+          "Ações",
+        ]}
+        vazio={!dados.length}
+      >
+        {dados.map((c) => (
+          <tr key={c.id}>
+            <td style={{ ...td, color: T.text, fontWeight: 600 }}>
+              {c.nome}
+            </td>
+
             <td style={td}>{c.telefone}</td>
             <td style={td}>{c.origem}</td>
+
             <td style={td}>
               <Chip>{c.status}</Chip>
             </td>
+
             <td style={td}>{dataBR(c.data)}</td>
-            <RowActions textoCopia={`${c.nome}\n${c.telefone}\nOrigem: ${c.origem}\nStatus: ${c.status}`} />
+
+            <td style={{ ...td, textAlign: "right" }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  gap: 5,
+                  alignItems: "center",
+                }}
+              >
+                <BotaoWhatsApp telefone={c.telefone} pequeno />
+
+                <BotaoAgendarIcon
+                  onClick={() =>
+                    window.dispatchEvent(
+                      new CustomEvent("crm-agendar", {
+                        detail: {
+                          cliente: c.nome,
+                          telefone: c.telefone,
+                        },
+                      })
+                    )
+                  }
+                />
+
+                <IconButton
+                  title="Editar contato"
+                  onClick={() => setEditando({ ...c })}
+                >
+                  <IconPen size={14} />
+                </IconButton>
+
+                <IconButton
+                  danger
+                  title="Excluir contato"
+                  onClick={() => {
+                    if (confirm("Excluir este contato?")) {
+                      setContatos((lista) =>
+                        lista.filter((x) => x.id !== c.id)
+                      );
+                    }
+                  }}
+                >
+                  <IconX size={14} />
+                </IconButton>
+              </span>
+            </td>
           </tr>
         ))}
       </Table>
+
       <Rodape n={dados.length} total={contatos.length} />
+
+      {editando && (
+        <Modal
+          titulo={editando.id ? "Editar contato" : "Novo contato"}
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Nome">
+              <input
+                style={inputBase}
+                value={editando.nome}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    nome: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Telefone / WhatsApp">
+              <input
+                style={inputBase}
+                value={editando.telefone}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    telefone: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Origem">
+              <Select
+                value={editando.origem}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    origem: v,
+                  })
+                }
+                options={[
+                  "WhatsApp",
+                  "Instagram",
+                  "Ligação",
+                  "Site",
+                  "Indicação",
+                ]}
+              />
+            </Campo>
+
+            <Campo label="Status">
+              <Select
+                value={editando.status}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    status: v,
+                  })
+                }
+                options={[
+                  "Novo contato",
+                  "Em atendimento",
+                  "Retorno agendado",
+                  "Orçamento enviado",
+                  "Cliente em potencial",
+                  "Em retorno",
+                ]}
+              />
+            </Campo>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+              marginTop: 18,
+            }}
+          >
+            <GhostButton onClick={() => setEditando(null)}>
+              Cancelar
+            </GhostButton>
+
+            <GoldButton onClick={salvarContato}>
+              Salvar
+            </GoldButton>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
+/* ==========================================================
+   ORÇAMENTOS
+   ========================================================== */
+
 function Orcamentos({ de, ate, setDe, setAte }) {
-  const [orcamentos, setOrcamentos] = useLocalStorage("crm_orcamentos", []);
+  const [orcamentos, setOrcamentos] = useLocalStorage(
+    "crm_orcamentos",
+    orcamentosIniciais
+  );
+
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
+  const [editando, setEditando] = useState(null);
 
   function novoOrcamento() {
-    const cliente = prompt("Nome do cliente:");
-    if (!cliente) return;
-    const produto = prompt("Produto/serviço:");
-    if (!produto) return;
-    const valorTexto = prompt("Valor do orçamento (ex.: 1500,00):");
-    if (!valorTexto) return;
-    const valor = Number(valorTexto.replace(/\./g, "").replace(",", "."));
-    if (!Number.isFinite(valor)) {
-      alert("Valor inválido.");
+    setEditando({
+      numero: `ORC-${Date.now()}`,
+      cliente: "",
+      produto: "",
+      valor: "",
+      status: "Enviado",
+      data: hojeISO(),
+    });
+  }
+
+  function salvar() {
+    if (!editando.cliente || !editando.produto) {
+      alert("Preencha cliente e produto/serviço.");
       return;
     }
-    const statusNovo = prompt("Status: Enviado, Em negociação, Aprovado ou Perdido", "Enviado") || "Enviado";
-    const novo = {
-      numero: `ORC-${Date.now()}`,
-      cliente,
-      produto,
-      valor,
-      status: statusNovo,
-      data: new Date().toISOString().slice(0, 10),
+
+    const item = {
+      ...editando,
+      valor: Number(editando.valor || 0),
     };
-    setOrcamentos((lista) => [...lista, novo]);
+
+    setOrcamentos((lista) => {
+      const existe = lista.some(
+        (o) => o.numero === item.numero
+      );
+
+      return existe
+        ? lista.map((o) =>
+            o.numero === item.numero ? item : o
+          )
+        : [...lista, item];
+    });
+
+    setEditando(null);
   }
 
   const dados = useMemo(() => {
     let l = filtrarPorPeriodo(orcamentos, de, ate);
-    if (status !== "Todos") l = l.filter((o) => o.status === status);
+
+    if (status !== "Todos") {
+      l = l.filter((o) => o.status === status);
+    }
+
     const q = busca.trim().toLowerCase();
-    if (q) l = l.filter((o) => [o.numero, o.cliente, o.produto].join(" ").toLowerCase().includes(q));
+
+    if (q) {
+      l = l.filter((o) =>
+        [o.numero, o.cliente, o.produto]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
     return l;
   }, [orcamentos, busca, status, de, ate]);
 
-  const somaTotal = dados.reduce((s, o) => s + o.valor, 0);
-  const colunas = ["Nº", "Cliente", "Produto/Serviço", "Valor", "Status", "Data"];
-  const linhas = dados.map((o) => [o.numero, o.cliente, o.produto, brl(o.valor), o.status, dataBR(o.data)]);
-  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
-
   return (
     <div>
-      <PageHead titulo="Orçamentos" sub="Acompanhe e gerencie todos os orçamentos enviados." acao={<GoldButton icon={IconPlus} onClick={novoOrcamento}>Novo orçamento</GoldButton>} />
+      <PageHead
+        titulo="Orçamentos"
+        sub="Acompanhe e gerencie todos os orçamentos."
+        acao={
+          <GoldButton icon={IconPlus} onClick={novoOrcamento}>
+            Novo orçamento
+          </GoldButton>
+        }
+      />
+
       <Toolbar>
-        <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por cliente, produto ou número..." />
-        <Select value={status} onChange={setStatus} options={["Todos", "Enviado", "Em negociação", "Aprovado", "Perdido"]} />
-        <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Orçamentos" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <SearchInput
+          value={busca}
+          onChange={setBusca}
+          placeholder="Buscar orçamento..."
+        />
+
+        <Select
+          value={status}
+          onChange={setStatus}
+          options={[
+            "Todos",
+            "Enviado",
+            "Em negociação",
+            "Aprovado",
+            "Perdido",
+          ]}
+        />
+
+        <DateRange
+          de={de}
+          ate={ate}
+          setDe={setDe}
+          setAte={setAte}
+        />
       </Toolbar>
-      <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
+
+      <Table
+        head={[
+          "Nº",
+          "Cliente",
+          "Produto/Serviço",
+          "Valor",
+          "Status",
+          "Data",
+          "Ações",
+        ]}
+        vazio={!dados.length}
+      >
         {dados.map((o) => (
           <tr key={o.numero}>
-            <td style={{ ...td, color: T.muted, fontVariantNumeric: "tabular-nums" }}>{o.numero}</td>
-            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{o.cliente}</td>
+            <td style={td}>{o.numero}</td>
+
+            <td style={{ ...td, color: T.text, fontWeight: 600 }}>
+              {o.cliente}
+            </td>
+
             <td style={td}>{o.produto}</td>
-            <td style={{ ...td, color: T.gold, fontWeight: 600 }}>{brl(o.valor)}</td>
-            <td style={td}><Chip>{o.status}</Chip></td>
+
+            <td style={{ ...td, color: T.gold, fontWeight: 600 }}>
+              {brl(o.valor)}
+            </td>
+
+            <td style={td}>
+              <Chip>{o.status}</Chip>
+            </td>
+
             <td style={td}>{dataBR(o.data)}</td>
-            <RowActions textoCopia={`Orçamento ${o.numero}
-${o.cliente}
-${o.produto}
-${brl(o.valor)}
-Status: ${o.status}
-Data: ${dataBR(o.data)}`} />
+
+            <td style={{ ...td, textAlign: "right" }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  gap: 5,
+                }}
+              >
+                <IconButton
+                  title="Editar orçamento"
+                  onClick={() => setEditando({ ...o })}
+                >
+                  <IconPen size={14} />
+                </IconButton>
+
+                <IconButton
+                  danger
+                  title="Excluir orçamento"
+                  onClick={() => {
+                    if (confirm("Excluir este orçamento?")) {
+                      setOrcamentos((lista) =>
+                        lista.filter(
+                          (x) => x.numero !== o.numero
+                        )
+                      );
+                    }
+                  }}
+                >
+                  <IconX size={14} />
+                </IconButton>
+              </span>
+            </td>
           </tr>
         ))}
       </Table>
-      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginTop: 12, fontSize: 12.5, color: T.muted }}>
-        <span>{dados.length} de {orcamentos.length} orçamentos</span>
-        <span>Total no período: <strong style={{ color: T.gold }}>{brl(somaTotal)}</strong></span>
-      </div>
+
+      <Rodape n={dados.length} total={orcamentos.length} />
+
+      {editando && (
+        <Modal
+          titulo="Editar orçamento"
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Cliente">
+              <input
+                style={inputBase}
+                value={editando.cliente}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    cliente: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Produto / Serviço">
+              <input
+                style={inputBase}
+                value={editando.produto}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    produto: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Valor">
+              <input
+                style={inputBase}
+                type="number"
+                value={editando.valor}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    valor: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Status">
+              <Select
+                value={editando.status}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    status: v,
+                  })
+                }
+                options={[
+                  "Enviado",
+                  "Em negociação",
+                  "Aprovado",
+                  "Perdido",
+                ]}
+              />
+            </Campo>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 18,
+            }}
+          >
+            <GoldButton onClick={salvar}>
+              Salvar alterações
+            </GoldButton>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
-function Funil({ de, ate, setDe, setAte }) {
-  const cli = filtrarPorPeriodo(clientes, de, ate);
-  const orc = filtrarPorPeriodo(orcamentos, de, ate);
-  const etapas = [
-    { rotulo: "Contato inicial", valor: cli.length },
-    { rotulo: "Em negociação", valor: cli.filter((c) => c.status === "Em negociação").length + orc.filter((o) => o.status === "Em negociação").length },
-    { rotulo: "Proposta", valor: orc.filter((o) => o.status === "Enviado").length },
-    { rotulo: "Fechados", valor: orc.filter((o) => o.status === "Aprovado").length },
-  ];
-  const topo = etapas[0].valor || 1;
-  const conv = Math.round((etapas[3].valor / topo) * 100);
-  const colunas = ["Etapa", "Quantidade", "% do topo do funil"];
-  const linhas = etapas.map((e) => [e.rotulo, e.valor, `${Math.round((e.valor / topo) * 100)}%`]);
+/* ==========================================================
+   AGENDA — VISUAL ESTILO GOOGLE CALENDAR
+   ========================================================== */
 
-  return (
-    <div>
-      <PageHead
-        titulo="Funil de vendas"
-        sub="Visualize em qual etapa estão seus leads e oportunidades."
-        acao={
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-            <ExportBar titulo="Funil de vendas" colunas={colunas} linhas={linhas} />
-          </div>
-        }
-      />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
-        <Panel>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {etapas.map((e, i) => {
-              const largura = 100 - i * 18;
-              const pct = Math.round((e.valor / topo) * 100);
-              const tons = [T.goldLight, T.gold, "#8C7638", "#4A4A52"];
-              return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 130, display: "flex", justifyContent: "center" }}>
-                    <div
-                      style={{
-                        width: `${largura}%`,
-                        height: 34,
-                        background: tons[i],
-                        clipPath: "polygon(0 0, 100% 0, 88% 100%, 12% 100%)",
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, color: T.textMid }}>{e.rotulo}</div>
-                    <div style={{ fontSize: 19, fontWeight: 700, color: T.text }}>{e.valor}</div>
-                  </div>
-                  <span style={{ fontSize: 12.5, color: T.muted }}>{pct}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Panel>
-            <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 16 }}>Taxa de conversão</div>
-            <Gauge pct={conv} titulo={`${etapas[3].valor} de ${topo}`} sub="leads viraram vendas" />
-          </Panel>
-          <Panel>
-            <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 12 }}>Média do mês</div>
-            <div style={{ height: 9, background: T.cardAlt, borderRadius: 999, overflow: "hidden" }}>
-              <div style={{ width: `${Math.min((etapas[3].valor / 20) * 100, 100)}%`, height: "100%", background: T.gold }} />
-            </div>
-            <div style={{ fontSize: 12.5, color: T.muted, marginTop: 9 }}>{etapas[3].valor} de 20 vendas na meta</div>
-          </Panel>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Relatorios({ de, ate, setDe, setAte }) {
-  const orc = filtrarPorPeriodo(orcamentos, de, ate);
-  const cli = filtrarPorPeriodo(clientes, de, ate);
-  const aprovados = orc.filter((o) => o.status === "Aprovado");
-  const receita = aprovados.reduce((s, o) => s + o.valor, 0);
-  const ticket = aprovados.length ? receita / aprovados.length : 0;
-
-  const porDia = Array.from({ length: 31 }, (_, i) => {
-    const dia = String(i + 1).padStart(2, "0");
-    const doDia = orc.filter((o) => o.data.endsWith("-" + dia));
-    return { rotulo: dia, valor: doDia.reduce((s, o) => s + o.valor, 0), destaque: doDia.length > 0 };
-  });
-
-  const origens = ["WhatsApp", "Instagram", "Ligação", "Site", "Indicação"];
-  const cont = filtrarPorPeriodo(contatos, de, ate);
-  const tons = [T.goldLight, T.gold, "#9C8240", "#5E5E66", "#37373E"];
-  const dadosOrigem = origens.map((o, i) => ({
-    rotulo: o,
-    valor: cont.filter((c) => c.origem === o).length,
-    cor: tons[i],
-  }));
-
-  const colunas = ["Nº", "Cliente", "Produto/Serviço", "Valor", "Status", "Data"];
-  const linhas = orc.map((o) => [o.numero, o.cliente, o.produto, brl(o.valor), o.status, dataBR(o.data)]);
-  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
-
-  return (
-    <div>
-      <PageHead
-        titulo="Relatórios"
-        sub="Acompanhe seu desempenho com dados e gráficos."
-        acao={
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-            <ExportBar titulo="Relatório de vendas" colunas={colunas} linhas={linhas} periodo={periodo} />
-          </div>
-        }
-         
-      />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 16 }}>
-        <StatCard rotulo="Vendas" valor={brl(receita).replace(",00", "")} delta="28%" icon={IconTrend} />
-        <StatCard rotulo="Orçamentos" valor={orc.length} delta="25%" icon={IconDoc} />
-        <StatCard rotulo="Clientes novos" valor={cli.length} delta="43%" icon={IconUser} />
-        <StatCard rotulo="Ticket médio" valor={brl(ticket).replace(",00", "")} delta="16%" icon={IconChart} />
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: 14 }}>
-        <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Vendas por período</div>
-          <div style={{ fontSize: 12, color: T.muted, marginTop: 3 }}>Valor de orçamentos por dia do mês</div>
-          <Bars dados={porDia} />
-        </Panel>
-        <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 18 }}>Origem dos contatos</div>
-          <Donut total={cont.length} legendaCentro="contatos" dados={dadosOrigem} />
-        </Panel>
-      </div>
-    </div>
-  );
-}
-/* ================== AGENDA ================== */
-
-const STATUS_AGENDA = ["Agendado", "Concluído", "Cancelado"];
-const CHIP_AGENDA = { Agendado: T.blue, "Concluído": T.green, Cancelado: T.red };
-
-function ChipAgenda({ children }) {
-  const cor = CHIP_AGENDA[children] || T.grey;
-  return (
-    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap", background: cor, color: "#0C0C0D" }}>
-      {children}
-    </span>
-  );
-}
+const STATUS_AGENDA = [
+  "Agendado",
+  "Concluído",
+  "Cancelado",
+];
 
 function Agenda() {
-  const [compromissos, setCompromissos] = useLocalStorage("crm_agenda", []);
-  const [form, setForm] = useState({ cliente: "", telefone: "", data: "", hora: "", tipo: "Consulta", obs: "" });
-  const [filtroData, setFiltroData] = useState("");
+  const [compromissos, setCompromissos] = useLocalStorage(
+    "crm_agenda",
+    agendaInicial
+  );
 
-  function atualizar(campo, valor) {
-    setForm((f) => ({ ...f, [campo]: valor }));
+  const [dataAtual, setDataAtual] = useState(hojeISO());
+  const [modo, setModo] = useState("dia");
+  const [editando, setEditando] = useState(null);
+
+  useEffect(() => {
+    function receberAgendamento(e) {
+      const d = e.detail || {};
+
+      setEditando({
+        id: null,
+        cliente: d.cliente || "",
+        telefone: d.telefone || "",
+        data: dataAtual,
+        hora: "09:00",
+        tipo: "Reunião",
+        status: "Agendado",
+        obs: "",
+      });
+    }
+
+    window.addEventListener(
+      "crm-agendar",
+      receberAgendamento
+    );
+
+    return () =>
+      window.removeEventListener(
+        "crm-agendar",
+        receberAgendamento
+      );
+  }, [dataAtual]);
+
+  function mudarDia(delta) {
+    const d = new Date(`${dataAtual}T12:00:00`);
+    d.setDate(d.getDate() + delta);
+    setDataAtual(d.toISOString().slice(0, 10));
   }
 
-  function adicionar() {
-    if (!form.cliente || !form.data || !form.hora) {
-      alert("Preencha ao menos o nome do paciente, a data e a hora.");
+  function salvar() {
+    if (
+      !editando.cliente ||
+      !editando.data ||
+      !editando.hora
+    ) {
+      alert("Preencha cliente, data e horário.");
       return;
     }
-    setCompromissos((lista) => [...lista, { id: Date.now(), ...form, status: "Agendado" }]);
-    setForm({ cliente: "", telefone: "", data: "", hora: "", tipo: "Consulta", obs: "" });
-  }
 
-  function mudarStatus(id, status) {
-    setCompromissos((lista) => lista.map((c) => (c.id === id ? { ...c, status } : c)));
+    if (editando.id) {
+      setCompromissos((lista) =>
+        lista.map((c) =>
+          c.id === editando.id ? editando : c
+        )
+      );
+    } else {
+      setCompromissos((lista) => [
+        ...lista,
+        {
+          ...editando,
+          id: Date.now(),
+        },
+      ]);
+    }
+
+    setEditando(null);
   }
 
   function remover(id) {
     if (confirm("Remover este agendamento?")) {
-      setCompromissos((lista) => lista.filter((c) => c.id !== id));
+      setCompromissos((lista) =>
+        lista.filter((c) => c.id !== id)
+      );
     }
   }
 
-  const ordenados = useMemo(() => {
-    let l = [...compromissos].sort((a, b) => (a.data + a.hora).localeCompare(b.data + b.hora));
-    if (filtroData) l = l.filter((c) => c.data === filtroData);
-    return l;
-  }, [compromissos, filtroData]);
+  function mudarStatus(id, status) {
+    setCompromissos((lista) =>
+      lista.map((c) =>
+        c.id === id ? { ...c, status } : c
+      )
+    );
+  }
+
+  const eventosDia = compromissos
+    .filter((c) => c.data === dataAtual)
+    .sort((a, b) =>
+      String(a.hora).localeCompare(String(b.hora))
+    );
+
+  const horas = Array.from(
+    { length: 13 },
+    (_, i) => i + 8
+  );
+
+  const eventosDaHora = (hora) =>
+    eventosDia.filter(
+      (c) => Number(String(c.hora).split(":")[0]) === hora
+    );
+
+  const tituloData = new Date(
+    `${dataAtual}T12:00:00`
+  ).toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <div>
-      <PageHead titulo="Agenda" sub="Marque, acompanhe e organize os atendimentos da clínica." />
+      <PageHead
+        titulo="Agenda"
+        sub="Sua agenda de atendimentos."
+        acao={
+          <GoldButton
+            icon={IconPlus}
+            onClick={() =>
+              setEditando({
+                id: null,
+                cliente: "",
+                telefone: "",
+                data: dataAtual,
+                hora: "09:00",
+                tipo: "Consulta",
+                status: "Agendado",
+                obs: "",
+              })
+            }
+          >
+            Novo agendamento
+          </GoldButton>
+        }
+      />
 
-      <Panel style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo agendamento</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
-          <input style={inputBase} placeholder="Nome do paciente" value={form.cliente} onChange={(e) => atualizar("cliente", e.target.value)} />
-          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
-          <input style={{ ...inputBase, colorScheme: "dark" }} type="date" value={form.data} onChange={(e) => atualizar("data", e.target.value)} />
-          <input style={{ ...inputBase, colorScheme: "dark" }} type="time" value={form.hora} onChange={(e) => atualizar("hora", e.target.value)} />
-          <Select value={form.tipo} onChange={(v) => atualizar("tipo", v)} options={["Consulta", "Retorno", "Avaliação", "Procedimento"]} />
+      {/* CONTROLES */}
+
+      <Panel
+        pad={12}
+        style={{
+          marginBottom: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ display: "flex", gap: 6 }}>
+          <GhostButton onClick={() => setDataAtual(hojeISO())}>
+            Hoje
+          </GhostButton>
+
+          <IconButton
+            title="Dia anterior"
+            onClick={() => mudarDia(-1)}
+          >
+            ‹
+          </IconButton>
+
+          <IconButton
+            title="Próximo dia"
+            onClick={() => mudarDia(1)}
+          >
+            ›
+          </IconButton>
         </div>
-        <input style={{ ...inputBase, width: "100%", marginBottom: 12 }} placeholder="Observações (opcional)" value={form.obs} onChange={(e) => atualizar("obs", e.target.value)} />
-        <GoldButton icon={IconPlus} onClick={adicionar}>Agendar</GoldButton>
+
+        <div
+          style={{
+            color: T.text,
+            fontSize: 15,
+            fontWeight: 600,
+            textTransform: "capitalize",
+          }}
+        >
+          {tituloData}
+        </div>
+
+        <div style={{ display: "flex", gap: 6 }}>
+          <input
+            type="date"
+            value={dataAtual}
+            onChange={(e) => setDataAtual(e.target.value)}
+            style={{
+              ...inputBase,
+              colorScheme:
+                T === TEMAS.escuro ? "dark" : "light",
+            }}
+          />
+
+          <Select
+            value={modo}
+            onChange={setModo}
+            options={["dia", "lista"]}
+          />
+        </div>
       </Panel>
 
-      <Toolbar>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: T.panel, border: `1px solid ${T.border}`, borderRadius: 8, padding: "5px 10px" }}>
-          <IconCalendar size={14} color={T.gold} />
-          <input type="date" value={filtroData} onChange={(e) => setFiltroData(e.target.value)} style={{ ...inputBase, border: "none", background: "transparent", padding: "4px 2px", colorScheme: "dark" }} />
-          {filtroData && (
-            <button onClick={() => setFiltroData("")} style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", fontSize: 16 }}>×</button>
+      {modo === "dia" ? (
+        <Panel pad={0} style={{ overflow: "hidden" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "72px 1fr",
+              minWidth: 600,
+            }}
+          >
+            <div
+              style={{
+                background: T.cardAlt,
+                borderRight: `1px solid ${T.border}`,
+              }}
+            >
+              {horas.map((h) => (
+                <div
+                  key={h}
+                  style={{
+                    height: 72,
+                    borderBottom: `1px solid ${T.borderSoft}`,
+                    padding: "8px 10px",
+                    color: T.muted,
+                    fontSize: 11,
+                    textAlign: "right",
+                  }}
+                >
+                  {String(h).padStart(2, "0")}:00
+                </div>
+              ))}
+            </div>
+
+            <div>
+              {horas.map((h) => {
+                const eventos = eventosDaHora(h);
+
+                return (
+                  <div
+                    key={h}
+                    onDoubleClick={() =>
+                      setEditando({
+                        id: null,
+                        cliente: "",
+                        telefone: "",
+                        data: dataAtual,
+                        hora: `${String(h).padStart(
+                          2,
+                          "0"
+                        )}:00`,
+                        tipo: "Reunião",
+                        status: "Agendado",
+                        obs: "",
+                      })
+                    }
+                    style={{
+                      height: 72,
+                      borderBottom: `1px solid ${T.borderSoft}`,
+                      position: "relative",
+                      padding: 5,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {eventos.map((c) => (
+                      <div
+                        key={c.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditando({ ...c });
+                        }}
+                        style={{
+                          background:
+                            c.status === "Cancelado"
+                              ? T.red + "22"
+                              : T.gold + "20",
+                          borderLeft: `4px solid ${
+                            c.status === "Cancelado"
+                              ? T.red
+                              : c.status === "Concluído"
+                              ? T.green
+                              : T.gold
+                          }`,
+                          borderRadius: 7,
+                          padding: "7px 9px",
+                          height: 60,
+                          overflow: "hidden",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: T.text,
+                            fontWeight: 700,
+                            fontSize: 12,
+                          }}
+                        >
+                          {c.hora} · {c.cliente}
+                        </div>
+
+                        <div
+                          style={{
+                            color: T.textMid,
+                            fontSize: 11,
+                            marginTop: 3,
+                          }}
+                        >
+                          {c.tipo}
+                          {c.obs ? ` · ${c.obs}` : ""}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Panel>
+      ) : (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          {eventosDia.map((c) => (
+            <Panel
+              key={c.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                cursor: "pointer",
+              }}
+              onClick={() => setEditando({ ...c })}
+            >
+              <div
+                style={{
+                  width: 65,
+                  color: T.gold,
+                  fontWeight: 700,
+                }}
+              >
+                {c.hora}
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    color: T.text,
+                    fontWeight: 600,
+                  }}
+                >
+                  {c.cliente}
+                </div>
+
+                <div
+                  style={{
+                    color: T.muted,
+                    fontSize: 12,
+                    marginTop: 3,
+                  }}
+                >
+                  {c.tipo} · {c.telefone}
+                </div>
+              </div>
+
+              <Chip>{c.status}</Chip>
+
+              <IconButton
+                danger
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remover(c.id);
+                }}
+              >
+                <IconX size={14} />
+              </IconButton>
+            </Panel>
+          ))}
+
+          {!eventosDia.length && (
+            <Panel
+              style={{
+                textAlign: "center",
+                color: T.muted,
+                padding: 50,
+              }}
+            >
+              Nenhum agendamento neste dia.
+            </Panel>
           )}
         </div>
-      </Toolbar>
+      )}
 
-      <Table head={["Paciente", "Telefone", "Data", "Hora", "Tipo", "Status", "Ações"]} vazio={ordenados.length === 0}>
-        {ordenados.map((c) => (
-          <tr key={c.id}>
-            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.cliente}</td>
-            <td style={td}>{c.telefone}</td>
-            <td style={td}>{c.data ? dataBR(c.data) : ""}</td>
-            <td style={td}>{c.hora}</td>
-            <td style={td}>{c.tipo}</td>
-            <td style={td}><ChipAgenda>{c.status}</ChipAgenda></td>
-            <td style={{ ...td, textAlign: "right" }}>
-              <select value={c.status} onChange={(e) => mudarStatus(c.id, e.target.value)} style={{ ...inputBase, padding: "5px 8px", fontSize: 12, marginRight: 6 }}>
-                {STATUS_AGENDA.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <button onClick={() => remover(c.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 5 }} title="Remover">✕</button>
-            </td>
-          </tr>
-        ))}
-      </Table>
-      <Rodape n={ordenados.length} total={compromissos.length} />
+      {editando && (
+        <Modal
+          titulo={
+            editando.id
+              ? "Editar agendamento"
+              : "Novo agendamento"
+          }
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Cliente / Paciente">
+              <input
+                style={inputBase}
+                value={editando.cliente}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    cliente: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Telefone">
+              <input
+                style={inputBase}
+                value={editando.telefone}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    telefone: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Data">
+              <input
+                type="date"
+                style={inputBase}
+                value={editando.data}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    data: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Horário">
+              <input
+                type="time"
+                style={inputBase}
+                value={editando.hora}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    hora: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Tipo">
+              <Select
+                value={editando.tipo}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    tipo: v,
+                  })
+                }
+                options={[
+                  "Reunião",
+                  "Consulta",
+                  "Retorno",
+                  "Avaliação",
+                  "Procedimento",
+                ]}
+              />
+            </Campo>
+
+            <Campo label="Status">
+              <Select
+                value={editando.status}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    status: v,
+                  })
+                }
+                options={STATUS_AGENDA}
+              />
+            </Campo>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <Campo label="Observações">
+                <textarea
+                  style={{
+                    ...inputBase,
+                    width: "100%",
+                    minHeight: 80,
+                    resize: "vertical",
+                  }}
+                  value={editando.obs}
+                  onChange={(e) =>
+                    setEditando({
+                      ...editando,
+                      obs: e.target.value,
+                    })
+                  }
+                />
+              </Campo>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 8,
+              marginTop: 18,
+            }}
+          >
+            {editando.id ? (
+              <GhostButton
+                onClick={() => remover(editando.id)}
+              >
+                Excluir
+              </GhostButton>
+            ) : (
+              <span />
+            )}
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <GhostButton
+                onClick={() => setEditando(null)}
+              >
+                Cancelar
+              </GhostButton>
+
+              <GoldButton onClick={salvar}>
+                Salvar agendamento
+              </GoldButton>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
-/* ================== PAGAMENTOS ================== */
 
-const FORMAS_PAGAMENTO = ["Pix", "Cartão", "Dinheiro", "Boleto"];
-const CHIP_PAG = { Pendente: T.orange, Pago: T.green };
-
-function ChipPagamento({ children }) {
-  const cor = CHIP_PAG[children] || T.grey;
-  return (
-    <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 6, fontSize: 11.5, fontWeight: 600, whiteSpace: "nowrap", background: cor, color: "#0C0C0D" }}>
-      {children}
-    </span>
-  );
-}
+/* ==========================================================
+   PAGAMENTOS
+   ========================================================== */
 
 function Pagamentos({ de, ate, setDe, setAte }) {
-  const [pagamentos, setPagamentos] = useLocalStorage("crm_pagamentos", []);
+  const [pagamentos, setPagamentos] = useLocalStorage(
+    "crm_pagamentos",
+    pagamentosIniciais
+  );
+
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
-  const [form, setForm] = useState({ cliente: "", telefone: "", descricao: "", valor: "", forma: "Pix", data: "" });
+  const [editando, setEditando] = useState(null);
 
-  function atualizar(campo, valor) {
-    setForm((f) => ({ ...f, [campo]: valor }));
+  function novoPagamento() {
+    setEditando({
+      id: null,
+      cliente: "",
+      telefone: "",
+      descricao: "",
+      valor: "",
+      forma: "Pix",
+      data: hojeISO(),
+      status: "Pendente",
+      dataPagamento: null,
+    });
   }
 
-  function adicionar() {
-    if (!form.cliente || !form.valor || !form.data) {
-      alert("Preencha ao menos o nome do paciente, o valor e o vencimento.");
+  function salvar() {
+    if (!editando.cliente || !editando.valor || !editando.data) {
+      alert("Preencha cliente, valor e vencimento.");
       return;
     }
-    setPagamentos((lista) => [
-      ...lista,
-      { id: Date.now(), ...form, valor: Number(form.valor), status: "Pendente", dataPagamento: null },
-    ]);
-    setForm({ cliente: "", telefone: "", descricao: "", valor: "", forma: "Pix", data: "" });
+
+    const item = {
+      ...editando,
+      valor: Number(editando.valor),
+    };
+
+    setPagamentos((lista) => {
+      const existe = lista.some(
+        (p) => p.id === item.id
+      );
+
+      return existe
+        ? lista.map((p) => (p.id === item.id ? item : p))
+        : [...lista, { ...item, id: Date.now() }];
+    });
+
+    setEditando(null);
   }
 
   function marcarPago(id) {
     setPagamentos((lista) =>
-      lista.map((p) => (p.id === id ? { ...p, status: "Pago", dataPagamento: new Date().toISOString().slice(0, 10) } : p))
+      lista.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status: "Pago",
+              dataPagamento: hojeISO(),
+            }
+          : p
+      )
     );
-  }
-
-  function marcarPendente(id) {
-    setPagamentos((lista) => lista.map((p) => (p.id === id ? { ...p, status: "Pendente", dataPagamento: null } : p)));
-  }
-
-  function remover(id) {
-    if (confirm("Remover este lançamento?")) {
-      setPagamentos((lista) => lista.filter((p) => p.id !== id));
-    }
   }
 
   const dados = useMemo(() => {
     let l = filtrarPorPeriodo(pagamentos, de, ate);
-    if (status !== "Todos") l = l.filter((p) => p.status === status);
+
+    if (status !== "Todos") {
+      l = l.filter((p) => p.status === status);
+    }
+
     const q = busca.trim().toLowerCase();
-    if (q) l = l.filter((p) => [p.cliente, p.telefone, p.descricao].join(" ").toLowerCase().includes(q));
+
+    if (q) {
+      l = l.filter((p) =>
+        [p.cliente, p.telefone, p.descricao]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
     return l;
   }, [pagamentos, busca, status, de, ate]);
 
-  const totalPendente = pagamentos.filter((p) => p.status === "Pendente").reduce((s, p) => s + p.valor, 0);
-  const totalPago = pagamentos.filter((p) => p.status === "Pago").reduce((s, p) => s + p.valor, 0);
-  const qtdPendente = pagamentos.filter((p) => p.status === "Pendente").length;
-  const qtdPago = pagamentos.filter((p) => p.status === "Pago").length;
-
-  const colunas = ["Paciente", "Descrição", "Valor", "Forma", "Vencimento", "Status", "Pago em"];
-  const linhas = dados.map((p) => [p.cliente, p.descricao, brl(p.valor), p.forma, dataBR(p.data), p.status, p.dataPagamento ? dataBR(p.dataPagamento) : "—"]);
-  const periodo = de || ate ? `Período: ${de ? dataBR(de) : "início"} a ${ate ? dataBR(ate) : "hoje"}` : null;
-
   return (
     <div>
-      <PageHead titulo="Pagamentos" sub="Controle o que está pendente e o que já foi recebido." />
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginBottom: 16 }}>
-        <StatCard rotulo="Pendente" valor={brl(totalPendente).replace(",00", "")} icon={IconWallet} />
-        <StatCard rotulo="Recebido" valor={brl(totalPago).replace(",00", "")} icon={IconCheck} />
-        <StatCard rotulo="Lançamentos pendentes" valor={qtdPendente} icon={IconDoc} />
-        <StatCard rotulo="Lançamentos pagos" valor={qtdPago} icon={IconDoc} />
-      </div>
-
-      <Panel style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo lançamento</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
-          <input style={inputBase} placeholder="Nome do paciente" value={form.cliente} onChange={(e) => atualizar("cliente", e.target.value)} />
-          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
-          <input style={inputBase} placeholder="Descrição (ex: Consulta)" value={form.descricao} onChange={(e) => atualizar("descricao", e.target.value)} />
-          <input style={inputBase} type="number" placeholder="Valor (R$)" value={form.valor} onChange={(e) => atualizar("valor", e.target.value)} />
-          <Select value={form.forma} onChange={(v) => atualizar("forma", v)} options={FORMAS_PAGAMENTO} />
-          <input style={{ ...inputBase, colorScheme: "dark" }} type="date" value={form.data} onChange={(e) => atualizar("data", e.target.value)} />
-        </div>
-        <GoldButton icon={IconPlus} onClick={adicionar}>Lançar</GoldButton>
-      </Panel>
+      <PageHead
+        titulo="Pagamentos"
+        sub="Controle seus lançamentos."
+        acao={
+          <GoldButton
+            icon={IconPlus}
+            onClick={novoPagamento}
+          >
+            Novo lançamento
+          </GoldButton>
+        }
+      />
 
       <Toolbar>
-        <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por paciente, telefone ou descrição..." />
-        <Select value={status} onChange={setStatus} options={["Todos", "Pendente", "Pago"]} />
-        <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Pagamentos" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <SearchInput
+          value={busca}
+          onChange={setBusca}
+          placeholder="Buscar pagamento..."
+        />
+
+        <Select
+          value={status}
+          onChange={setStatus}
+          options={["Todos", "Pendente", "Pago"]}
+        />
+
+        <DateRange
+          de={de}
+          ate={ate}
+          setDe={setDe}
+          setAte={setAte}
+        />
       </Toolbar>
 
-      <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
+      <Table
+        head={[
+          "Cliente",
+          "Descrição",
+          "Valor",
+          "Forma",
+          "Vencimento",
+          "Status",
+          "Ações",
+        ]}
+        vazio={!dados.length}
+      >
         {dados.map((p) => (
           <tr key={p.id}>
-            <td style={{ ...td, color: T.text, fontWeight: 500 }}>{p.cliente}</td>
+            <td style={{ ...td, color: T.text, fontWeight: 600 }}>
+              {p.cliente}
+            </td>
+
             <td style={td}>{p.descricao}</td>
-            <td style={{ ...td, color: T.gold, fontWeight: 600 }}>{brl(p.valor)}</td>
+
+            <td
+              style={{
+                ...td,
+                color: T.gold,
+                fontWeight: 600,
+              }}
+            >
+              {brl(p.valor)}
+            </td>
+
             <td style={td}>{p.forma}</td>
             <td style={td}>{dataBR(p.data)}</td>
-            <td style={td}><ChipPagamento>{p.status}</ChipPagamento></td>
-            <td style={td}>{p.dataPagamento ? dataBR(p.dataPagamento) : "—"}</td>
+
+            <td style={td}>
+              <Chip>{p.status}</Chip>
+            </td>
+
             <td style={{ ...td, textAlign: "right" }}>
-              {p.status === "Pendente" ? (
-                <GhostButton onClick={() => marcarPago(p.id)}>Marcar pago</GhostButton>
-              ) : (
-                <GhostButton onClick={() => marcarPendente(p.id)}>Reabrir</GhostButton>
-              )}
-              <button onClick={() => remover(p.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 5, marginLeft: 6 }} title="Remover">✕</button>
+              <span
+                style={{
+                  display: "inline-flex",
+                  gap: 5,
+                }}
+              >
+                {p.status === "Pendente" && (
+                  <GhostButton
+                    onClick={() => marcarPago(p.id)}
+                  >
+                    Marcar pago
+                  </GhostButton>
+                )}
+
+                <IconButton
+                  title="Editar pagamento"
+                  onClick={() => setEditando({ ...p })}
+                >
+                  <IconPen size={14} />
+                </IconButton>
+
+                <IconButton
+                  danger
+                  title="Excluir pagamento"
+                  onClick={() => {
+                    if (confirm("Excluir este lançamento?")) {
+                      setPagamentos((lista) =>
+                        lista.filter(
+                          (x) => x.id !== p.id
+                        )
+                      );
+                    }
+                  }}
+                >
+                  <IconX size={14} />
+                </IconButton>
+              </span>
             </td>
           </tr>
         ))}
       </Table>
+
       <Rodape n={dados.length} total={pagamentos.length} />
+
+      {editando && (
+        <Modal
+          titulo="Editar pagamento"
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Cliente">
+              <input
+                style={inputBase}
+                value={editando.cliente}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    cliente: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Telefone">
+              <input
+                style={inputBase}
+                value={editando.telefone}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    telefone: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Descrição">
+              <input
+                style={inputBase}
+                value={editando.descricao}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    descricao: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Valor">
+              <input
+                style={inputBase}
+                type="number"
+                value={editando.valor}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    valor: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Forma de pagamento">
+              <Select
+                value={editando.forma}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    forma: v,
+                  })
+                }
+                options={[
+                  "Pix",
+                  "Cartão",
+                  "Dinheiro",
+                  "Boleto",
+                ]}
+              />
+            </Campo>
+
+            <Campo label="Vencimento">
+              <input
+                type="date"
+                style={inputBase}
+                value={editando.data}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    data: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Status">
+              <Select
+                value={editando.status}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    status: v,
+                  })
+                }
+                options={["Pendente", "Pago"]}
+              />
+            </Campo>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 18,
+            }}
+          >
+            <GoldButton onClick={salvar}>
+              Salvar alterações
+            </GoldButton>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
-/* ================== KANBAN DE LEADS ================== */
 
-const ETAPAS_KANBAN = ["Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"];
+/* ==========================================================
+   KANBAN
+   ========================================================== */
+
+const ETAPAS_KANBAN = [
+  "Novo lead",
+  "Em atendimento",
+  "Follow up",
+  "Agendado",
+  "Paciente",
+  "Sem interesse",
+];
+
 const COR_ETAPA = {
   "Novo lead": T.gold,
   "Em atendimento": T.blue,
   "Follow up": T.orange,
-  "Agendado": T.goldLight,
-  "Paciente": T.green,
+  Agendado: T.goldLight,
+  Paciente: T.green,
   "Sem interesse": T.grey,
 };
 
-function CartaoLead({ lead, onMover, onRemover, arrastando, setArrastando }) {
+function CartaoLead({
+  lead,
+  onMover,
+  onRemover,
+  onEditar,
+  onAgendar,
+  arrastando,
+  setArrastando,
+}) {
   return (
     <div
       draggable
@@ -1541,173 +3066,892 @@ function CartaoLead({ lead, onMover, onRemover, arrastando, setArrastando }) {
         opacity: arrastando === lead.id ? 0.4 : 1,
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{lead.nome}</div>
-        <CopyButton texto={`${lead.nome}\n${lead.telefone}\nOrigem: ${lead.origem}\nEtapa: ${lead.etapa}`} title="Copiar dados" />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 6,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: T.text,
+          }}
+        >
+          {lead.nome}
+        </div>
+
+        <IconButton
+          title="Editar lead"
+          onClick={() => onEditar(lead)}
+        >
+          <IconPen size={13} />
+        </IconButton>
       </div>
-      <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>{lead.telefone}</div>
-      {lead.origem && <div style={{ fontSize: 11, color: T.muted, marginTop: 4 }}>Origem: {lead.origem}</div>}
-      <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: T.muted,
+          marginTop: 2,
+        }}
+      >
+        {lead.telefone}
+      </div>
+
+      {lead.origem && (
+        <div
+          style={{
+            fontSize: 11,
+            color: T.muted,
+            marginTop: 4,
+          }}
+        >
+          Origem: {lead.origem}
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          marginTop: 10,
+          alignItems: "center",
+        }}
+      >
+        <BotaoWhatsApp
+          telefone={lead.telefone}
+          pequeno
+        />
+
+        <BotaoAgendarIcon
+          title="Agendar reunião"
+          onClick={() => onAgendar(lead)}
+        />
+
         <select
           value={lead.etapa}
-          onChange={(e) => onMover(lead.id, e.target.value)}
-          style={{ ...inputBase, flex: 1, padding: "5px 8px", fontSize: 11.5 }}
+          onChange={(e) =>
+            onMover(lead.id, e.target.value)
+          }
+          style={{
+            ...inputBase,
+            flex: 1,
+            padding: "5px 8px",
+            fontSize: 11.5,
+          }}
         >
           {ETAPAS_KANBAN.map((e) => (
-            <option key={e} value={e}>{e}</option>
+            <option key={e} value={e}>
+              {e}
+            </option>
           ))}
         </select>
-        <button onClick={() => onRemover(lead.id)} style={{ background: "none", border: "none", color: T.red, cursor: "pointer", padding: 4 }} title="Remover">✕</button>
+
+        <IconButton
+          danger
+          title="Excluir lead"
+          onClick={() => onRemover(lead.id)}
+        >
+          <IconX size={13} />
+        </IconButton>
       </div>
     </div>
   );
 }
 
 function Kanban() {
-  const [leads, setLeads] = useLocalStorage("crm_leads", []);
-  const [form, setForm] = useState({ nome: "", telefone: "", origem: "WhatsApp" });
-  const [arrastando, setArrastando] = useState(null);
+  const [leads, setLeads] = useLocalStorage(
+    "crm_leads",
+    []
+  );
 
-  function atualizar(campo, valor) {
-    setForm((f) => ({ ...f, [campo]: valor }));
-  }
+  const [form, setForm] = useState({
+    nome: "",
+    telefone: "",
+    origem: "WhatsApp",
+  });
+
+  const [arrastando, setArrastando] = useState(null);
+  const [editando, setEditando] = useState(null);
 
   function adicionar() {
     if (!form.nome || !form.telefone) {
-      alert("Preencha ao menos o nome e o telefone do lead.");
+      alert("Preencha nome e telefone.");
       return;
     }
-    setLeads((lista) => [...lista, { id: Date.now(), ...form, etapa: "Novo lead" }]);
-    setForm({ nome: "", telefone: "", origem: "WhatsApp" });
+
+    setLeads((lista) => [
+      ...lista,
+      {
+        id: Date.now(),
+        ...form,
+        etapa: "Novo lead",
+      },
+    ]);
+
+    setForm({
+      nome: "",
+      telefone: "",
+      origem: "WhatsApp",
+    });
+  }
+
+  function salvarLead() {
+    if (!editando.nome || !editando.telefone) {
+      alert("Preencha nome e telefone.");
+      return;
+    }
+
+    setLeads((lista) =>
+      lista.map((l) =>
+        l.id === editando.id ? editando : l
+      )
+    );
+
+    setEditando(null);
   }
 
   function mover(id, etapa) {
-    setLeads((lista) => lista.map((l) => (l.id === id ? { ...l, etapa } : l)));
+    setLeads((lista) =>
+      lista.map((l) =>
+        l.id === id ? { ...l, etapa } : l
+      )
+    );
   }
 
   function remover(id) {
     if (confirm("Remover este lead?")) {
-      setLeads((lista) => lista.filter((l) => l.id !== id));
+      setLeads((lista) =>
+        lista.filter((l) => l.id !== id)
+      );
     }
+  }
+
+  function agendar(lead) {
+    window.dispatchEvent(
+      new CustomEvent("crm-agendar", {
+        detail: {
+          cliente: lead.nome,
+          telefone: lead.telefone,
+        },
+      })
+    );
   }
 
   return (
     <div>
-      <PageHead titulo="Kanban de leads" sub="Arraste os cartões entre as colunas ou use o seletor de etapa." />
+      <PageHead
+        titulo="Kanban de leads"
+        sub="Organize seus clientes e leads por etapa."
+      />
 
       <Panel style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Novo lead</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: 12 }}>
-          <input style={inputBase} placeholder="Nome" value={form.nome} onChange={(e) => atualizar("nome", e.target.value)} />
-          <input style={inputBase} placeholder="Telefone" value={form.telefone} onChange={(e) => atualizar("telefone", e.target.value)} />
-          <Select value={form.origem} onChange={(v) => atualizar("origem", v)} options={["WhatsApp", "Instagram", "Ligação", "Site", "Indicação"]} />
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: T.text,
+            marginBottom: 14,
+          }}
+        >
+          Novo lead
         </div>
-        <GoldButton icon={IconPlus} onClick={adicionar}>Adicionar lead</GoldButton>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(160px,1fr))",
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <input
+            style={inputBase}
+            placeholder="Nome"
+            value={form.nome}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                nome: e.target.value,
+              })
+            }
+          />
+
+          <input
+            style={inputBase}
+            placeholder="Telefone"
+            value={form.telefone}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                telefone: e.target.value,
+              })
+            }
+          />
+
+          <Select
+            value={form.origem}
+            onChange={(v) =>
+              setForm({
+                ...form,
+                origem: v,
+              })
+            }
+            options={[
+              "WhatsApp",
+              "Instagram",
+              "Ligação",
+              "Site",
+              "Indicação",
+            ]}
+          />
+        </div>
+
+        <GoldButton icon={IconPlus} onClick={adicionar}>
+          Adicionar lead
+        </GoldButton>
       </Panel>
 
-      <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          overflowX: "auto",
+          paddingBottom: 8,
+        }}
+      >
         {ETAPAS_KANBAN.map((etapa) => {
-          const doEtapa = leads.filter((l) => l.etapa === etapa);
+          const doEtapa = leads.filter(
+            (l) => l.etapa === etapa
+          );
+
           return (
             <div
               key={etapa}
               onDragOver={(e) => e.preventDefault()}
-              onDrop={() => arrastando && mover(arrastando, etapa)}
-              style={{ minWidth: 230, flex: "0 0 230px", background: T.panel, border: `1px solid ${T.borderSoft}`, borderRadius: 10, padding: 12 }}
+              onDrop={() =>
+                arrastando &&
+                mover(arrastando, etapa)
+              }
+              style={{
+                minWidth: 250,
+                flex: "0 0 250px",
+                background: T.panel,
+                border: `1px solid ${T.borderSoft}`,
+                borderRadius: 10,
+                padding: 12,
+              }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12 }}>
-                <span style={{ width: 8, height: 8, borderRadius: 999, background: COR_ETAPA[etapa] }} />
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: T.text }}>{etapa}</span>
-                <span style={{ fontSize: 11.5, color: T.muted, marginLeft: "auto" }}>{doEtapa.length}</span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  marginBottom: 12,
+                }}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    background:
+                      COR_ETAPA[etapa],
+                  }}
+                />
+
+                <span
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: T.text,
+                  }}
+                >
+                  {etapa}
+                </span>
+
+                <span
+                  style={{
+                    fontSize: 11.5,
+                    color: T.muted,
+                    marginLeft: "auto",
+                  }}
+                >
+                  {doEtapa.length}
+                </span>
               </div>
+
               {doEtapa.map((lead) => (
-                <CartaoLead key={lead.id} lead={lead} onMover={mover} onRemover={remover} arrastando={arrastando} setArrastando={setArrastando} />
+                <CartaoLead
+                  key={lead.id}
+                  lead={lead}
+                  onMover={mover}
+                  onRemover={remover}
+                  onEditar={(l) =>
+                    setEditando({ ...l })
+                  }
+                  onAgendar={agendar}
+                  arrastando={arrastando}
+                  setArrastando={
+                    setArrastando
+                  }
+                />
               ))}
-              {doEtapa.length === 0 && (
-                <div style={{ fontSize: 11.5, color: T.muted, textAlign: "center", padding: "16px 0" }}>Nenhum lead aqui</div>
+
+              {!doEtapa.length && (
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: T.muted,
+                    textAlign: "center",
+                    padding: "16px 0",
+                  }}
+                >
+                  Nenhum lead aqui
+                </div>
               )}
             </div>
           );
         })}
       </div>
+
+      {editando && (
+        <Modal
+          titulo="Editar lead"
+          onClose={() => setEditando(null)}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <Campo label="Nome">
+              <input
+                style={inputBase}
+                value={editando.nome}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    nome: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Telefone">
+              <input
+                style={inputBase}
+                value={editando.telefone}
+                onChange={(e) =>
+                  setEditando({
+                    ...editando,
+                    telefone: e.target.value,
+                  })
+                }
+              />
+            </Campo>
+
+            <Campo label="Origem">
+              <Select
+                value={editando.origem}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    origem: v,
+                  })
+                }
+                options={[
+                  "WhatsApp",
+                  "Instagram",
+                  "Ligação",
+                  "Site",
+                  "Indicação",
+                ]}
+              />
+            </Campo>
+
+            <Campo label="Etapa">
+              <Select
+                value={editando.etapa}
+                onChange={(v) =>
+                  setEditando({
+                    ...editando,
+                    etapa: v,
+                  })
+                }
+                options={ETAPAS_KANBAN}
+              />
+            </Campo>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: 18,
+            }}
+          >
+            <GoldButton onClick={salvarLead}>
+              Salvar alterações
+            </GoldButton>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
-function Configuracoes() {
-  const [prefs, setPrefs] = useState({ email: true, whatsapp: true, escuro: true });
-  const toggle = (k) => setPrefs((p) => ({ ...p, [k]: !p[k] }));
-  const linhas = [
-    ["email", "Notificações por e-mail"],
-    ["whatsapp", "Notificações no WhatsApp"],
-    ["escuro", "Tema escuro"],
+/* ==========================================================
+   FUNIL
+   ========================================================== */
+
+function Funil({ de, ate, setDe, setAte }) {
+  const [clientes] = useLocalStorage(
+    "crm_pacientes",
+    pacientesIniciais
+  );
+
+  const [orcamentos] = useLocalStorage(
+    "crm_orcamentos",
+    orcamentosIniciais
+  );
+
+  const cli = filtrarPorPeriodo(clientes, de, ate);
+  const orc = filtrarPorPeriodo(orcamentos, de, ate);
+
+  const etapas = [
+    {
+      rotulo: "Contato inicial",
+      valor: cli.length,
+    },
+    {
+      rotulo: "Em atendimento",
+      valor: cli.filter(
+        (c) => c.status === "Em atendimento"
+      ).length,
+    },
+    {
+      rotulo: "Proposta",
+      valor: orc.filter(
+        (o) => o.status === "Enviado"
+      ).length,
+    },
+    {
+      rotulo: "Fechados",
+      valor: orc.filter(
+        (o) => o.status === "Aprovado"
+      ).length,
+    },
   ];
+
+  const topo = etapas[0].valor || 1;
+
   return (
     <div>
-      <PageHead titulo="Configurações" sub="Personalize o sistema do seu jeito." />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 }}>
-        <Panel>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Perfil</div>
-            <GoldButton>Editar perfil</GoldButton>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <div style={{ fontSize: 11.5, color: T.muted, marginBottom: 5 }}>Nome</div>
-              <div style={{ fontSize: 13.5, color: T.text }}>Yasmin</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 11.5, color: T.muted, marginBottom: 5 }}>E-mail</div>
-              <div style={{ fontSize: 13.5, color: T.text }}>yasmin@email.com</div>
-            </div>
-          </div>
-        </Panel>
+      <PageHead
+        titulo="Funil de vendas"
+        sub="Visualize as etapas dos seus leads."
+        acao={
+          <DateRange
+            de={de}
+            ate={ate}
+            setDe={setDe}
+            setAte={setAte}
+          />
+        }
+      />
 
-        <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 16 }}>Preferências</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {linhas.map(([k, rotulo]) => (
-              <div key={k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-                <span style={{ fontSize: 13, color: T.textMid }}>{rotulo}</span>
-                <button
-                  onClick={() => toggle(k)}
-                  aria-pressed={prefs[k]}
+      <Panel>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          {etapas.map((e, i) => (
+            <div
+              key={e.rotulo}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+              }}
+            >
+              <div
+                style={{
+                  width: 150,
+                  height: 38,
+                  background: [
+                    T.goldLight,
+                    T.gold,
+                    T.goldDim,
+                    T.grey,
+                  ][i],
+                  clipPath:
+                    "polygon(0 0,100% 0,90% 100%,10% 100%)",
+                }}
+              />
+
+              <div style={{ flex: 1 }}>
+                <div
                   style={{
-                    width: 40,
-                    height: 22,
-                    borderRadius: 999,
-                    border: "none",
-                    background: prefs[k] ? T.gold : T.cardAlt,
-                    position: "relative",
-                    cursor: "pointer",
-                    transition: "background .15s",
+                    color: T.textMid,
+                    fontSize: 13,
                   }}
                 >
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 3,
-                      left: prefs[k] ? 21 : 3,
-                      width: 16,
-                      height: 16,
-                      borderRadius: 999,
-                      background: prefs[k] ? "#14120A" : T.muted,
-                      transition: "left .15s",
-                    }}
-                  />
-                </button>
+                  {e.rotulo}
+                </div>
+
+                <strong
+                  style={{
+                    color: T.text,
+                    fontSize: 20,
+                  }}
+                >
+                  {e.valor}
+                </strong>
               </div>
-            ))}
+
+              <span style={{ color: T.muted }}>
+                {Math.round(
+                  (e.valor / topo) * 100
+                )}
+                %
+              </span>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+/* ==========================================================
+   RELATÓRIOS
+   ========================================================== */
+
+function Relatorios({ de, ate, setDe, setAte }) {
+  const [orcamentos] = useLocalStorage(
+    "crm_orcamentos",
+    orcamentosIniciais
+  );
+
+  const [clientes] = useLocalStorage(
+    "crm_pacientes",
+    pacientesIniciais
+  );
+
+  const aprovados = orcamentos.filter(
+    (o) => o.status === "Aprovado"
+  );
+
+  const receita = aprovados.reduce(
+    (s, o) => s + Number(o.valor || 0),
+    0
+  );
+
+  const ticket = aprovados.length
+    ? receita / aprovados.length
+    : 0;
+
+  return (
+    <div>
+      <PageHead
+        titulo="Relatórios"
+        sub="Acompanhe seus números."
+        acao={
+          <DateRange
+            de={de}
+            ate={ate}
+            setDe={setDe}
+            setAte={setAte}
+          />
+        }
+      />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit,minmax(190px,1fr))",
+          gap: 14,
+        }}
+      >
+        <StatCard
+          rotulo="Vendas"
+          valor={brl(receita)}
+          icon={IconTrend}
+        />
+
+        <StatCard
+          rotulo="Orçamentos"
+          valor={orcamentos.length}
+          icon={IconDoc}
+        />
+
+        <StatCard
+          rotulo="Clientes"
+          valor={clientes.length}
+          icon={IconUser}
+        />
+
+        <StatCard
+          rotulo="Ticket médio"
+          valor={brl(ticket)}
+          icon={IconChart}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================
+   CONFIGURAÇÕES
+   ========================================================== */
+
+function Configuracoes({ tema, setTema }) {
+  const [prefs, setPrefs] = useLocalStorage(
+    "crm_prefs",
+    {
+      email: true,
+      whatsapp: true,
+    }
+  );
+
+  function toggle(k) {
+    setPrefs((p) => ({
+      ...p,
+      [k]: !p[k],
+    }));
+  }
+
+  const escuro = tema === "escuro";
+
+  return (
+    <div>
+      <PageHead
+        titulo="Configurações"
+        sub="Personalize o sistema."
+      />
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit,minmax(300px,1fr))",
+          gap: 14,
+        }}
+      >
+        <Panel>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 18,
+            }}
+          >
+            Aparência
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 20,
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  color: T.text,
+                  fontWeight: 600,
+                }}
+              >
+                Tema do CRM
+              </div>
+
+              <div
+                style={{
+                  color: T.muted,
+                  fontSize: 12,
+                  marginTop: 4,
+                }}
+              >
+                Alterne entre modo escuro e claro.
+              </div>
+            </div>
+
+            <button
+              onClick={() =>
+                setTema(
+                  escuro ? "claro" : "escuro"
+                )
+              }
+              style={{
+                width: 52,
+                height: 28,
+                borderRadius: 999,
+                border: `1px solid ${T.border}`,
+                background: escuro
+                  ? T.gold
+                  : T.cardAlt,
+                position: "relative",
+                cursor: "pointer",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  top: 3,
+                  left: escuro ? 26 : 3,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  background: escuro
+                    ? "#17130A"
+                    : T.gold,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {escuro ? (
+                  <IconMoon size={12} />
+                ) : (
+                  <IconSun size={12} />
+                )}
+              </span>
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginTop: 18,
+            }}
+          >
+            <GhostButton
+              onClick={() => setTema("claro")}
+              icon={IconSun}
+            >
+              Modo claro
+            </GhostButton>
+
+            <GhostButton
+              onClick={() => setTema("escuro")}
+              icon={IconMoon}
+            >
+              Modo escuro
+            </GhostButton>
           </div>
         </Panel>
 
         <Panel>
-          <div style={{ fontSize: 15, fontWeight: 600, color: T.text, marginBottom: 14 }}>Sobre o sistema</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: T.text,
+              marginBottom: 16,
+            }}
+          >
+            Notificações
+          </div>
+
+          {[
+            ["email", "Notificações por e-mail"],
+            ["whatsapp", "Notificações no WhatsApp"],
+          ].map(([key, label]) => (
+            <div
+              key={key}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "11px 0",
+              }}
+            >
+              <span
+                style={{
+                  color: T.textMid,
+                  fontSize: 13,
+                }}
+              >
+                {label}
+              </span>
+
+              <button
+                onClick={() => toggle(key)}
+                style={{
+                  width: 40,
+                  height: 22,
+                  borderRadius: 999,
+                  border: "none",
+                  background: prefs[key]
+                    ? T.gold
+                    : T.cardAlt,
+                  position: "relative",
+                  cursor: "pointer",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: 3,
+                    left: prefs[key] ? 21 : 3,
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    background: prefs[key]
+                      ? "#14120A"
+                      : T.muted,
+                  }}
+                />
+              </button>
+            </div>
+          ))}
+        </Panel>
+
+        <Panel>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
             <Butterfly size={22} />
+
             <div>
-              <div style={{ fontSize: 13.5, color: T.text, fontWeight: 600 }}>CRM Vendas v1.00</div>
-              <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>Feito para impulsionar suas vendas.</div>
+              <div
+                style={{
+                  color: T.text,
+                  fontWeight: 600,
+                }}
+              >
+                CRM Vendas v2.00
+              </div>
+
+              <div
+                style={{
+                  color: T.muted,
+                  fontSize: 12,
+                  marginTop: 3,
+                }}
+              >
+                Sistema de gestão de clientes.
+              </div>
             </div>
           </div>
         </Panel>
@@ -1716,37 +3960,61 @@ function Configuracoes() {
   );
 }
 
-function Rodape({ n, total }) {
-  return (
-    <div style={{ marginTop: 12, fontSize: 12.5, color: T.muted }}>
-      Mostrando {n} de {total} registros
-    </div>
-  );
-}
-
-/* ================== LOGO + SHELL ================== */
-
-function Logo() {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "22px 0 26px" }}>
-      <Butterfly size={15} />
-      <div style={{ fontSize: 21, fontWeight: 700, color: T.gold, letterSpacing: "0.02em", lineHeight: 1 }}>CRM</div>
-      <div style={{ fontSize: 9, fontWeight: 600, color: T.goldDim, letterSpacing: "0.34em", marginLeft: "0.34em" }}>VENDAS</div>
-    </div>
-  );
-}
+/* ==========================================================
+   MENU
+   ========================================================== */
 
 const MENU = [
-  { id: "inicio", rotulo: "Início", icon: IconHome },
-  { id: "agenda", rotulo: "Agenda", icon: IconCalendar },
-  { id: "kanban", rotulo: "Kanban de leads", icon: IconKanban },
-  { id: "pagamentos", rotulo: "Pagamentos", icon: IconWallet },
-  { id: "clientes", rotulo: "Clientes", icon: IconUser },
-  { id: "contatos", rotulo: "Contatos", icon: IconChat },
-  { id: "orcamentos", rotulo: "Orçamentos", icon: IconDoc },
-  { id: "funil", rotulo: "Funil de Vendas", icon: IconFunnel },
-  { id: "relatorios", rotulo: "Relatórios", icon: IconChart },
+  {
+    id: "inicio",
+    rotulo: "Início",
+    icon: IconHome,
+  },
+  {
+    id: "agenda",
+    rotulo: "Agenda",
+    icon: IconCalendar,
+  },
+  {
+    id: "kanban",
+    rotulo: "Kanban de leads",
+    icon: IconKanban,
+  },
+  {
+    id: "pagamentos",
+    rotulo: "Pagamentos",
+    icon: IconWallet,
+  },
+  {
+    id: "clientes",
+    rotulo: "Clientes",
+    icon: IconUser,
+  },
+  {
+    id: "contatos",
+    rotulo: "Contatos",
+    icon: IconChat,
+  },
+  {
+    id: "orcamentos",
+    rotulo: "Orçamentos",
+    icon: IconDoc,
+  },
+  {
+    id: "funil",
+    rotulo: "Funil de Vendas",
+    icon: IconFunnel,
+  },
+  {
+    id: "relatorios",
+    rotulo: "Relatórios",
+    icon: IconChart,
+  },
 ];
+
+/* ==========================================================
+   APP
+   ========================================================== */
 
 export default function App() {
   const [aba, setAba] = useState("inicio");
@@ -1754,20 +4022,52 @@ export default function App() {
   const [ate, setAte] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
 
-  const props = { de, ate, setDe, setAte };
-      const telas = {
+  const [tema, setTema] = useLocalStorage(
+    "crm_tema",
+    "escuro"
+  );
+
+  /*
+    IMPORTANTE:
+    Mantemos T como objeto mutável para que todas as telas
+    existentes utilizem imediatamente as cores do tema.
+  */
+  T = {
+    ...TEMAS[tema],
+  };
+
+  useEffect(() => {
+    document.body.style.margin = "0";
+    document.body.style.background = T.bg;
+    document.body.style.color = T.text;
+    document.body.style.fontFamily = FONT;
+  }, [tema]);
+
+  const props = {
+    de,
+    ate,
+    setDe,
+    setAte,
+  };
+
+  const telas = {
     inicio: <Inicio {...props} />,
     agenda: <Agenda />,
     kanban: <Kanban />,
     pagamentos: <Pagamentos {...props} />,
-clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
+    clientes: <Pacientes {...props} />,
     contatos: <Contatos {...props} />,
     orcamentos: <Orcamentos {...props} />,
     funil: <Funil {...props} />,
     relatorios: <Relatorios {...props} />,
-    config: <Configuracoes />,
+    config: (
+      <Configuracoes
+        tema={tema}
+        setTema={setTema}
+      />
+    ),
   };
-   
+
   const itemStyle = (ativo) => ({
     display: "flex",
     alignItems: "center",
@@ -1777,21 +4077,34 @@ clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
     borderRadius: 9,
     border: "none",
     cursor: "pointer",
-    background: ativo ? T.gold + "1C" : "transparent",
+    background: ativo
+      ? T.gold + "1C"
+      : "transparent",
     color: ativo ? T.gold : T.muted,
     fontSize: 13.5,
     fontWeight: ativo ? 600 : 500,
     textAlign: "left",
     fontFamily: FONT,
-    boxShadow: ativo ? `inset 2px 0 0 ${T.gold}` : "none",
+    boxShadow: ativo
+      ? `inset 2px 0 0 ${T.gold}`
+      : "none",
   });
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: T.bg, fontFamily: FONT, color: T.text }}>
-      {/* Sidebar */}
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        background: T.bg,
+        fontFamily: FONT,
+        color: T.text,
+      }}
+    >
+      {/* SIDEBAR */}
+
       <aside
         style={{
-          width: 200,
+          width: 210,
           background: T.panel,
           borderRight: `1px solid ${T.borderSoft}`,
           display: "flex",
@@ -1801,12 +4114,53 @@ clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
           position: "sticky",
           top: 0,
           height: "100vh",
+          boxSizing: "border-box",
         }}
         className="crm-sidebar"
         data-aberto={menuAberto}
       >
-        <Logo />
-        <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 3,
+            padding: "22px 0 26px",
+          }}
+        >
+          <Butterfly size={15} />
+
+          <div
+            style={{
+              fontSize: 21,
+              fontWeight: 700,
+              color: T.gold,
+            }}
+          >
+            CRM
+          </div>
+
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 600,
+              color: T.goldDim,
+              letterSpacing: ".34em",
+              marginLeft: ".34em",
+            }}
+          >
+            VENDAS
+          </div>
+        </div>
+
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            flex: 1,
+          }}
+        >
           {MENU.map((m) => (
             <button
               key={m.id}
@@ -1821,14 +4175,26 @@ clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
             </button>
           ))}
         </nav>
-        <button onClick={() => setAba("config")} style={itemStyle(aba === "config")}>
+
+        <button
+          onClick={() => setAba("config")}
+          style={itemStyle(aba === "config")}
+        >
           <IconGear size={16} />
           Configurações
         </button>
       </aside>
 
-      {/* Conteúdo */}
-      <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+      {/* CONTEÚDO */}
+
+      <main
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <header
           style={{
             height: 56,
@@ -1838,17 +4204,72 @@ clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
             justifyContent: "space-between",
             padding: "0 26px",
             gap: 12,
+            background: T.panel,
           }}
         >
           <button
-            onClick={() => setMenuAberto((v) => !v)}
+            onClick={() =>
+              setMenuAberto((v) => !v)
+            }
             className="crm-burger"
-            style={{ display: "none", background: "none", border: "none", color: T.gold, cursor: "pointer", fontSize: 20 }}
+            style={{
+              display: "none",
+              background: "none",
+              border: "none",
+              color: T.gold,
+              cursor: "pointer",
+              fontSize: 20,
+            }}
           >
             ☰
           </button>
+
           <div style={{ flex: 1 }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, color: T.textMid }}>
+
+          {/* BOTÃO RÁPIDO DE TEMA */}
+
+          <button
+            title={
+              tema === "escuro"
+                ? "Modo claro"
+                : "Modo escuro"
+            }
+            onClick={() =>
+              setTema(
+                tema === "escuro"
+                  ? "claro"
+                  : "escuro"
+              )
+            }
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 50,
+              border: `1px solid ${T.border}`,
+              background: T.cardAlt,
+              color: T.gold,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            {tema === "escuro" ? (
+              <IconSun size={16} />
+            ) : (
+              <IconMoon size={16} />
+            )}
+          </button>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              fontSize: 13,
+              color: T.textMid,
+            }}
+          >
             <span
               style={{
                 width: 27,
@@ -1864,26 +4285,80 @@ clientes: <Pacientes pacientes={pacientesIniciais} {...props} />,
             >
               <IconUser size={14} />
             </span>
+
             Yasmin
           </div>
         </header>
 
-        <div style={{ padding: "26px 26px 40px", flex: 1 }}>{telas[aba]}</div>
+        <div
+          style={{
+            padding: "26px 26px 40px",
+            flex: 1,
+          }}
+        >
+          {telas[aba]}
+        </div>
       </main>
 
       <style>{`
-        *::-webkit-scrollbar{height:8px;width:8px}
-        *::-webkit-scrollbar-track{background:${T.panel}}
-        *::-webkit-scrollbar-thumb{background:${T.border};border-radius:8px}
-        input::placeholder{color:${T.muted}}
-        button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid ${T.gold};outline-offset:2px}
-        input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(4) hue-rotate(2deg);cursor:pointer}
-        @media (max-width: 860px){
-          .crm-sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:transform .2s}
-          .crm-sidebar[data-aberto="true"]{transform:translateX(0)}
-          .crm-burger{display:block !important}
+        * {
+          box-sizing: border-box;
         }
-        @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+
+        *::-webkit-scrollbar {
+          height: 8px;
+          width: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+          background: ${T.panel};
+        }
+
+        *::-webkit-scrollbar-thumb {
+          background: ${T.border};
+          border-radius: 8px;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+          color: ${T.muted};
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+          outline: 2px solid ${T.gold};
+          outline-offset: 2px;
+        }
+
+        input[type=date]::-webkit-calendar-picker-indicator,
+        input[type=time]::-webkit-calendar-picker-indicator {
+          cursor: pointer;
+        }
+
+        @media (max-width: 860px) {
+          .crm-sidebar {
+            position: fixed !important;
+            z-index: 50;
+            transform: translateX(-100%);
+            transition: transform .2s;
+          }
+
+          .crm-sidebar[data-aberto="true"] {
+            transform: translateX(0);
+          }
+
+          .crm-burger {
+            display: block !important;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            transition: none !important;
+          }
+        }
       `}</style>
     </div>
   );
