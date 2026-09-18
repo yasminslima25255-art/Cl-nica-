@@ -919,12 +919,55 @@ function Inicio({ de, ate, setDe, setAte }) {
   );
 }
 
-function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, setDe, setAte }) {
+function Pacientes({ de, ate, setDe, setAte }) {
+  const [pacientes, setPacientes] = useLocalStorage("crm_pacientes", pacientesIniciais);
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
   const [verArquivados, setVerArquivados] = useState(false);
 
   const base = pacientes.filter((p) => (verArquivados ? p.arquivado : !p.arquivado));
+
+  function novoPaciente() {
+    const nome = prompt("Nome do cliente:");
+    if (!nome) return;
+    const telefone = prompt("WhatsApp/telefone:") || "";
+    const cidade = prompt("Cidade:") || "";
+    const novo = {
+      id: gerarId(),
+      nome,
+      telefone,
+      cidade,
+      status: "Novo lead",
+      data: new Date().toISOString().slice(0, 10),
+      arquivado: false,
+    };
+    setPacientes((lista) => [...lista, novo]);
+  }
+
+  function editarPaciente(paciente) {
+    const nome = prompt("Nome do cliente:", paciente.nome);
+    if (!nome) return;
+    const telefone = prompt("WhatsApp/telefone:", paciente.telefone) || "";
+    const cidade = prompt("Cidade:", paciente.cidade) || "";
+    const statusNovo = prompt(
+      "Status:",
+      paciente.status
+    ) || paciente.status;
+
+    setPacientes((lista) => lista.map((p) =>
+      p.id === paciente.id
+        ? { ...p, nome, telefone, cidade, status: statusNovo, data: new Date().toISOString().slice(0, 10) }
+        : p
+    ));
+  }
+
+  function arquivarPaciente(id) {
+    setPacientes((lista) => lista.map((p) => p.id === id ? { ...p, arquivado: true } : p));
+  }
+
+  function restaurarPaciente(id) {
+    setPacientes((lista) => lista.map((p) => p.id === id ? { ...p, arquivado: false } : p));
+  }
 
   const dados = useMemo(() => {
     let l = filtrarPorPeriodo(base, de, ate);
@@ -932,7 +975,7 @@ function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, set
     const q = busca.trim().toLowerCase();
     if (q) l = l.filter((c) => [c.nome, c.telefone, c.cidade].join(" ").toLowerCase().includes(q));
     return l;
-  }, [base, busca, status, de, ate]);
+  }, [pacientes, busca, status, de, ate, verArquivados]);
 
   const colunas = ["Nome", "Telefone", "Cidade", "Status", "Último contato"];
   const linhas = dados.map((c) => [c.nome, c.telefone, c.cidade, c.status, dataBR(c.data)]);
@@ -941,14 +984,14 @@ function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, set
   return (
     <div>
       <PageHead
-        titulo="Pacientes"
-        sub="Gerencie seus pacientes e acompanhe o histórico de cada um."
+        titulo="Clientes"
+        sub="Gerencie seus clientes e acompanhe o histórico de cada um."
         acao={
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <GhostButton icon={verArquivados ? IconRestore : IconArchiveBox} onClick={() => setVerArquivados((v) => !v)}>
               {verArquivados ? "Ver ativos" : "Ver arquivados"}
             </GhostButton>
-            <GoldButton icon={IconPlus}>Novo paciente</GoldButton>
+            <GoldButton icon={IconPlus} onClick={novoPaciente}>Novo cliente</GoldButton>
           </div>
         }
       />
@@ -956,7 +999,7 @@ function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, set
         <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por nome, telefone ou cidade..." />
         <Select value={status} onChange={setStatus} options={["Todos", "Novo lead", "Em atendimento", "Follow up", "Agendado", "Paciente", "Sem interesse"]} />
         <DateRange de={de} ate={ate} setDe={setDe} setAte={setAte} />
-        <ExportBar titulo="Pacientes" colunas={colunas} linhas={linhas} periodo={periodo} />
+        <ExportBar titulo="Clientes" colunas={colunas} linhas={linhas} periodo={periodo} />
       </Toolbar>
       <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
         {dados.map((c) => (
@@ -964,22 +1007,23 @@ function Pacientes({ pacientes, onArquivar, onRestaurar, onAgendar, de, ate, set
             <td style={{ ...td, color: T.text, fontWeight: 500 }}>{c.nome}</td>
             <td style={td}>{c.telefone}</td>
             <td style={td}>{c.cidade}</td>
-            <td style={td}>
-              <Chip>{c.status}</Chip>
-            </td>
+            <td style={td}><Chip>{c.status}</Chip></td>
             <td style={td}>{dataBR(c.data)}</td>
             <td style={{ ...td, textAlign: "right" }}>
               <span style={{ display: "inline-flex", gap: 2, alignItems: "center" }}>
-                <CopyButton
-                  texto={`${c.nome}\n${c.telefone}\n${c.cidade}\nStatus: ${c.status}\nÚltimo contato: ${dataBR(c.data)}`}
-                  title="Copiar dados deste paciente"
-                />
-                <BotaoWhatsApp telefone={c.telefone} />
-                {!verArquivados && <BotaoAgendarIcon onClick={() => onAgendar(c.nome, c.telefone)} />}
+                <CopyButton texto={`${c.nome}
+${c.telefone}
+${c.cidade}
+Status: ${c.status}
+Último contato: ${dataBR(c.data)}`} title="Copiar dados deste cliente" />
+                <BotaoWhatsApp telefone={c.telefone} texto />
+                <button onClick={() => editarPaciente(c)} title="Editar cliente" style={{ background: "none", border: "none", color: T.muted, cursor: "pointer", padding: 5, display: "flex" }}>
+                  <IconPen size={14} />
+                </button>
                 {verArquivados ? (
-                  <BotaoRestaurarIcon onClick={() => onRestaurar(c.id)} />
+                  <BotaoRestaurarIcon onClick={() => restaurarPaciente(c.id)} />
                 ) : (
-                  <BotaoArquivarIcon onClick={() => onArquivar(c.id)} />
+                  <BotaoArquivarIcon onClick={() => arquivarPaciente(c.id)} />
                 )}
               </span>
             </td>
@@ -1039,8 +1083,33 @@ function Contatos({ de, ate, setDe, setAte }) {
 }
 
 function Orcamentos({ de, ate, setDe, setAte }) {
+  const [orcamentos, setOrcamentos] = useLocalStorage("crm_orcamentos", []);
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("Todos");
+
+  function novoOrcamento() {
+    const cliente = prompt("Nome do cliente:");
+    if (!cliente) return;
+    const produto = prompt("Produto/serviço:");
+    if (!produto) return;
+    const valorTexto = prompt("Valor do orçamento (ex.: 1500,00):");
+    if (!valorTexto) return;
+    const valor = Number(valorTexto.replace(/\./g, "").replace(",", "."));
+    if (!Number.isFinite(valor)) {
+      alert("Valor inválido.");
+      return;
+    }
+    const statusNovo = prompt("Status: Enviado, Em negociação, Aprovado ou Perdido", "Enviado") || "Enviado";
+    const novo = {
+      numero: `ORC-${Date.now()}`,
+      cliente,
+      produto,
+      valor,
+      status: statusNovo,
+      data: new Date().toISOString().slice(0, 10),
+    };
+    setOrcamentos((lista) => [...lista, novo]);
+  }
 
   const dados = useMemo(() => {
     let l = filtrarPorPeriodo(orcamentos, de, ate);
@@ -1048,7 +1117,7 @@ function Orcamentos({ de, ate, setDe, setAte }) {
     const q = busca.trim().toLowerCase();
     if (q) l = l.filter((o) => [o.numero, o.cliente, o.produto].join(" ").toLowerCase().includes(q));
     return l;
-  }, [busca, status, de, ate]);
+  }, [orcamentos, busca, status, de, ate]);
 
   const somaTotal = dados.reduce((s, o) => s + o.valor, 0);
   const colunas = ["Nº", "Cliente", "Produto/Serviço", "Valor", "Status", "Data"];
@@ -1057,7 +1126,7 @@ function Orcamentos({ de, ate, setDe, setAte }) {
 
   return (
     <div>
-      <PageHead titulo="Orçamentos" sub="Acompanhe e gerencie todos os orçamentos enviados." acao={<GoldButton icon={IconPlus}>Novo orçamento</GoldButton>} />
+      <PageHead titulo="Orçamentos" sub="Acompanhe e gerencie todos os orçamentos enviados." acao={<GoldButton icon={IconPlus} onClick={novoOrcamento}>Novo orçamento</GoldButton>} />
       <Toolbar>
         <SearchInput value={busca} onChange={setBusca} placeholder="Buscar por cliente, produto ou número..." />
         <Select value={status} onChange={setStatus} options={["Todos", "Enviado", "Em negociação", "Aprovado", "Perdido"]} />
@@ -1065,27 +1134,26 @@ function Orcamentos({ de, ate, setDe, setAte }) {
         <ExportBar titulo="Orçamentos" colunas={colunas} linhas={linhas} periodo={periodo} />
       </Toolbar>
       <Table head={[...colunas, "Ações"]} vazio={dados.length === 0}>
-        {dados.map((o, i) => (
-          <tr key={i}>
+        {dados.map((o) => (
+          <tr key={o.numero}>
             <td style={{ ...td, color: T.muted, fontVariantNumeric: "tabular-nums" }}>{o.numero}</td>
             <td style={{ ...td, color: T.text, fontWeight: 500 }}>{o.cliente}</td>
             <td style={td}>{o.produto}</td>
             <td style={{ ...td, color: T.gold, fontWeight: 600 }}>{brl(o.valor)}</td>
-            <td style={td}>
-              <Chip>{o.status}</Chip>
-            </td>
+            <td style={td}><Chip>{o.status}</Chip></td>
             <td style={td}>{dataBR(o.data)}</td>
-            <RowActions textoCopia={`Orçamento ${o.numero}\n${o.cliente}\n${o.produto}\n${brl(o.valor)}\nStatus: ${o.status}\nData: ${dataBR(o.data)}`} />
+            <RowActions textoCopia={`Orçamento ${o.numero}
+${o.cliente}
+${o.produto}
+${brl(o.valor)}
+Status: ${o.status}
+Data: ${dataBR(o.data)}`} />
           </tr>
         ))}
       </Table>
       <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginTop: 12, fontSize: 12.5, color: T.muted }}>
-        <span>
-          {dados.length} de {orcamentos.length} orçamentos
-        </span>
-        <span>
-          Total no período: <strong style={{ color: T.gold }}>{brl(somaTotal)}</strong>
-        </span>
+        <span>{dados.length} de {orcamentos.length} orçamentos</span>
+        <span>Total no período: <strong style={{ color: T.gold }}>{brl(somaTotal)}</strong></span>
       </div>
     </div>
   );
