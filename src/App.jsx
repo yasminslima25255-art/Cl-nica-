@@ -3111,6 +3111,8 @@ function CartaoLead({
           <IconX size={13} />
         </IconButton>
       </div>
+        );
+  }
 
       <select
         value={lead.etapa}
