@@ -458,7 +458,7 @@ function BotaoWhatsApp({ telefone, pequeno = false }) {
   if (!telefone) return null;
 
   return (
-    <a
+    
       href={linkWhatsApp(telefone)}
       target="_blank"
       rel="noopener noreferrer"
@@ -781,7 +781,7 @@ function DateRange({ de, ate, setDe, setAte }) {
           border: "none",
           background: "transparent",
           padding: "4px 2px",
-          colorScheme: T === TEMAS.escuro ? "dark" : "light",
+          colorScheme: T.escuro ? "dark" : "light",
           width: 126,
         }}
       />
@@ -797,7 +797,7 @@ function DateRange({ de, ate, setDe, setAte }) {
           border: "none",
           background: "transparent",
           padding: "4px 2px",
-          colorScheme: T === TEMAS.escuro ? "dark" : "light",
+          colorScheme: T.escuro ? "dark" : "light",
           width: 126,
         }}
       />
@@ -1403,7 +1403,7 @@ function Pacientes({ de, ate, setDe, setAte, aoAgendar }) {
               >
                 <BotaoWhatsApp telefone={c.telefone} pequeno />
 
-                               <BotaoAgendarIcon
+                <BotaoAgendarIcon
                   title="Agendar atendimento"
                   onClick={() => aoAgendar(c.nome, c.telefone)}
                 />
@@ -1703,7 +1703,7 @@ function Contatos({ de, ate, setDe, setAte, aoAgendar }) {
               >
                 <BotaoWhatsApp telefone={c.telefone} pequeno />
 
-                                <BotaoAgendarIcon
+                <BotaoAgendarIcon
                   onClick={() => aoAgendar(c.nome, c.telefone)}
                 />
 
@@ -2292,8 +2292,7 @@ function Agenda({ prefil, limparPrefil }) {
             onChange={(e) => setDataAtual(e.target.value)}
             style={{
               ...inputBase,
-              colorScheme:
-                T === TEMAS.escuro ? "dark" : "light",
+              colorScheme: T.escuro ? "dark" : "light",
             }}
           />
 
@@ -3111,40 +3110,6 @@ function CartaoLead({
           <IconX size={13} />
         </IconButton>
       </div>
-        );
-  }
-
-      <select
-        value={lead.etapa}
-        onChange={(e) =>
-          onMover(lead.id, e.target.value)
-        }
-        style={{
-          ...inputBase,
-          width: "100%",
-          marginTop: 8,
-          padding: "7px 9px",
-          fontSize: 11.5,
-        }}
-      >
-        {ETAPAS_KANBAN.map((e) => (
-          <option key={e} value={e}>
-            {e}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-               <IconButton
-          danger
-          title="Excluir lead"
-          onClick={() => onRemover(lead.id)}
-        >
-          <IconX size={13} />
-        </IconButton>
-      </div>
 
       <select
         value={lead.etapa}
@@ -3171,8 +3136,6 @@ function CartaoLead({
 
 function Kanban({ aoAgendar }) {
   const [leads, setLeads] = useLocalStorage("crm_leads", []);
-
-  const [form, setForm] = useState({
 
   const [form, setForm] = useState({
     nome: "",
@@ -3236,7 +3199,7 @@ function Kanban({ aoAgendar }) {
     }
   }
 
-   function agendar(lead) {
+  function agendar(lead) {
     aoAgendar(lead.nome, lead.telefone);
   }
 
@@ -3489,7 +3452,7 @@ function Kanban({ aoAgendar }) {
             </Campo>
           </div>
 
-                   <div
+          <div
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -3527,6 +3490,10 @@ function Kanban({ aoAgendar }) {
    ========================================================== */
 
 function Funil({ de, ate, setDe, setAte }) {
+  const [clientes] = useLocalStorage(
+    "crm_pacientes",
+    pacientesIniciais
+  );
 
   const [orcamentos] = useLocalStorage(
     "crm_orcamentos",
@@ -4050,6 +4017,7 @@ export default function App() {
   */
   T = {
     ...TEMAS[tema],
+    escuro: tema === "escuro",
   };
 
   useEffect(() => {
@@ -4074,7 +4042,7 @@ export default function App() {
     clientes: <Pacientes {...props} aoAgendar={irParaAgenda} />,
     contatos: <Contatos {...props} aoAgendar={irParaAgenda} />,
     orcamentos: <Orcamentos {...props} />,
- : <Funil {...props} />,
+    funil: <Funil {...props} />,
     relatorios: <Relatorios {...props} />,
     config: (
       <Configuracoes
@@ -4083,7 +4051,7 @@ export default function App() {
       />
     ),
   };
-   
+
   const itemStyle = (ativo) => ({
     display: "flex",
     alignItems: "center",
