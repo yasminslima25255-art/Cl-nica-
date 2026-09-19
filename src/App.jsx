@@ -3137,7 +3137,7 @@ function CartaoLead({
   );
 }
 
-        <IconButton
+               <IconButton
           danger
           title="Excluir lead"
           onClick={() => onRemover(lead.id)}
@@ -3145,10 +3145,34 @@ function CartaoLead({
           <IconX size={13} />
         </IconButton>
       </div>
-    );
+
+      <select
+        value={lead.etapa}
+        onChange={(e) =>
+          onMover(lead.id, e.target.value)
+        }
+        style={{
+          ...inputBase,
+          width: "100%",
+          marginTop: 8,
+          padding: "7px 9px",
+          fontSize: 11.5,
+        }}
+      >
+        {ETAPAS_KANBAN.map((e) => (
+          <option key={e} value={e}>
+            {e}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 }
 
 function Kanban({ aoAgendar }) {
+  const [leads, setLeads] = useLocalStorage("crm_leads", []);
+
+  const [form, setForm] = useState({
 
   const [form, setForm] = useState({
     nome: "",
@@ -3500,12 +3524,9 @@ function Kanban({ aoAgendar }) {
 
 /* ==========================================================
    FUNIL
+   ========================================================== */
 
 function Funil({ de, ate, setDe, setAte }) {
-  const [clientes] = useLocalStorage(
-    "crm_pacientes",
-    pacientesIniciais
-  );
 
   const [orcamentos] = useLocalStorage(
     "crm_orcamentos",
@@ -4053,7 +4074,7 @@ export default function App() {
     clientes: <Pacientes {...props} aoAgendar={irParaAgenda} />,
     contatos: <Contatos {...props} aoAgendar={irParaAgenda} />,
     orcamentos: <Orcamentos {...props} />,
-    funil: <Funil {...props} />,
+ : <Funil {...props} />,
     relatorios: <Relatorios {...props} />,
     config: (
       <Configuracoes
