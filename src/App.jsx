@@ -3135,7 +3135,6 @@ function CartaoLead({
   );
 }
 
-function Kanban({ aoAgendar }) {
         <IconButton
           danger
           title="Excluir lead"
@@ -3144,7 +3143,10 @@ function Kanban({ aoAgendar }) {
           <IconX size={13} />
         </IconButton>
       </div>
+    );
 }
+
+function Kanban({ aoAgendar }) {
 
   const [form, setForm] = useState({
     nome: "",
