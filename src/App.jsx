@@ -3085,7 +3085,7 @@ function CartaoLead({
         </div>
       )}
 
-                 <div
+      <div
         style={{
           display: "flex",
           gap: 6,
@@ -3102,6 +3102,14 @@ function CartaoLead({
           title="Agendar reunião"
           onClick={() => onAgendar(lead)}
         />
+
+        <IconButton
+          danger
+          title="Excluir lead"
+          onClick={() => onRemover(lead.id)}
+        >
+          <IconX size={13} />
+        </IconButton>
       </div>
 
       <select
@@ -3123,6 +3131,9 @@ function CartaoLead({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
        
         <IconButton
           danger
