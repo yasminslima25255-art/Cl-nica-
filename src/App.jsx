@@ -458,7 +458,7 @@ function BotaoWhatsApp({ telefone, pequeno = false }) {
   if (!telefone) return null;
 
   return (
-    
+    <a
       href={linkWhatsApp(telefone)}
       target="_blank"
       rel="noopener noreferrer"
