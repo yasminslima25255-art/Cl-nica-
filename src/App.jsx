@@ -3134,7 +3134,8 @@ function CartaoLead({
     </div>
   );
 }
-       
+
+function Kanban({ aoAgendar }) {
         <IconButton
           danger
           title="Excluir lead"
@@ -3144,12 +3145,6 @@ function CartaoLead({
         </IconButton>
       </div>
 }
-
-function Kanban({ aoAgendar }) {
-  const [leads, setLeads] = useLocalStorage(
-    "crm_leads",
-    []
-  );
 
   const [form, setForm] = useState({
     nome: "",
