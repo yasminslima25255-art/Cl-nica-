@@ -1243,7 +1243,7 @@ function Inicio({ de, ate, setDe, setAte }) {
    CLIENTES
    ========================================================== */
 
-function Pacientes({ de, ate, setDe, setAte }) {
+function Pacientes({ de, ate, setDe, setAte, aoAgendar }) {
   const [pacientes, setPacientes] = useLocalStorage(
     "crm_pacientes",
     pacientesIniciais
@@ -1403,18 +1403,9 @@ function Pacientes({ de, ate, setDe, setAte }) {
               >
                 <BotaoWhatsApp telefone={c.telefone} pequeno />
 
-                <BotaoAgendarIcon
+                               <BotaoAgendarIcon
                   title="Agendar atendimento"
-                  onClick={() => {
-                    window.dispatchEvent(
-                      new CustomEvent("crm-agendar", {
-                        detail: {
-                          cliente: c.nome,
-                          telefone: c.telefone,
-                        },
-                      })
-                    );
-                  }}
+                  onClick={() => aoAgendar(c.nome, c.telefone)}
                 />
 
                 <IconButton
@@ -1549,7 +1540,7 @@ function Pacientes({ de, ate, setDe, setAte }) {
    CONTATOS — BOTÃO AGORA FUNCIONA
    ========================================================== */
 
-function Contatos({ de, ate, setDe, setAte }) {
+function Contatos({ de, ate, setDe, setAte, aoAgendar }) {
   const [contatos, setContatos] = useLocalStorage(
     "crm_contatos",
     contatosIniciais
@@ -1712,17 +1703,8 @@ function Contatos({ de, ate, setDe, setAte }) {
               >
                 <BotaoWhatsApp telefone={c.telefone} pequeno />
 
-                <BotaoAgendarIcon
-                  onClick={() =>
-                    window.dispatchEvent(
-                      new CustomEvent("crm-agendar", {
-                        detail: {
-                          cliente: c.nome,
-                          telefone: c.telefone,
-                        },
-                      })
-                    )
-                  }
+                                <BotaoAgendarIcon
+                  onClick={() => aoAgendar(c.nome, c.telefone)}
                 />
 
                 <IconButton
@@ -2131,7 +2113,7 @@ const STATUS_AGENDA = [
   "Cancelado",
 ];
 
-function Agenda() {
+function Agenda({ prefil, limparPrefil }) {
   const [compromissos, setCompromissos] = useLocalStorage(
     "crm_agenda",
     agendaInicial
@@ -2142,32 +2124,21 @@ function Agenda() {
   const [editando, setEditando] = useState(null);
 
   useEffect(() => {
-    function receberAgendamento(e) {
-      const d = e.detail || {};
+    if (!prefil) return;
 
-      setEditando({
-        id: null,
-        cliente: d.cliente || "",
-        telefone: d.telefone || "",
-        data: dataAtual,
-        hora: "09:00",
-        tipo: "Reunião",
-        status: "Agendado",
-        obs: "",
-      });
-    }
+    setEditando({
+      id: null,
+      cliente: prefil.cliente || "",
+      telefone: prefil.telefone || "",
+      data: dataAtual,
+      hora: "09:00",
+      tipo: "Consulta",
+      status: "Agendado",
+      obs: "",
+    });
 
-    window.addEventListener(
-      "crm-agendar",
-      receberAgendamento
-    );
-
-    return () =>
-      window.removeEventListener(
-        "crm-agendar",
-        receberAgendamento
-      );
-  }, [dataAtual]);
+    limparPrefil();
+  }, [prefil]);
 
   function mudarDia(delta) {
     const d = new Date(`${dataAtual}T12:00:00`);
@@ -3114,7 +3085,7 @@ function CartaoLead({
         </div>
       )}
 
-      <div
+                 <div
         style={{
           display: "flex",
           gap: 6,
@@ -3131,26 +3102,28 @@ function CartaoLead({
           title="Agendar reunião"
           onClick={() => onAgendar(lead)}
         />
+      </div>
 
-        <select
-          value={lead.etapa}
-          onChange={(e) =>
-            onMover(lead.id, e.target.value)
-          }
-          style={{
-            ...inputBase,
-            flex: 1,
-            padding: "5px 8px",
-            fontSize: 11.5,
-          }}
-        >
-          {ETAPAS_KANBAN.map((e) => (
-            <option key={e} value={e}>
-              {e}
-            </option>
-          ))}
-        </select>
-
+      <select
+        value={lead.etapa}
+        onChange={(e) =>
+          onMover(lead.id, e.target.value)
+        }
+        style={{
+          ...inputBase,
+          width: "100%",
+          marginTop: 8,
+          padding: "7px 9px",
+          fontSize: 11.5,
+        }}
+      >
+        {ETAPAS_KANBAN.map((e) => (
+          <option key={e} value={e}>
+            {e}
+          </option>
+        ))}
+      </select>
+       
         <IconButton
           danger
           title="Excluir lead"
@@ -3159,11 +3132,9 @@ function CartaoLead({
           <IconX size={13} />
         </IconButton>
       </div>
-    </div>
-  );
 }
 
-function Kanban() {
+function Kanban({ aoAgendar }) {
   const [leads, setLeads] = useLocalStorage(
     "crm_leads",
     []
@@ -3231,15 +3202,8 @@ function Kanban() {
     }
   }
 
-  function agendar(lead) {
-    window.dispatchEvent(
-      new CustomEvent("crm-agendar", {
-        detail: {
-          cliente: lead.nome,
-          telefone: lead.telefone,
-        },
-      })
-    );
+   function agendar(lead) {
+    aoAgendar(lead.nome, lead.telefone);
   }
 
   return (
@@ -3491,16 +3455,32 @@ function Kanban() {
             </Campo>
           </div>
 
-          <div
+                   <div
             style={{
               display: "flex",
-              justifyContent: "flex-end",
+              justifyContent: "space-between",
+              gap: 8,
               marginTop: 18,
             }}
           >
-            <GoldButton onClick={salvarLead}>
-              Salvar alterações
-            </GoldButton>
+            <GhostButton
+              onClick={() => {
+                remover(editando.id);
+                setEditando(null);
+              }}
+            >
+              Excluir lead
+            </GhostButton>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <GhostButton onClick={() => setEditando(null)}>
+                Cancelar
+              </GhostButton>
+
+              <GoldButton onClick={salvarLead}>
+                Salvar alterações
+              </GoldButton>
+            </div>
           </div>
         </Modal>
       )}
@@ -3510,7 +3490,6 @@ function Kanban() {
 
 /* ==========================================================
    FUNIL
-   ========================================================== */
 
 function Funil({ de, ate, setDe, setAte }) {
   const [clientes] = useLocalStorage(
@@ -4021,6 +4000,12 @@ export default function App() {
   const [de, setDe] = useState("");
   const [ate, setAte] = useState("");
   const [menuAberto, setMenuAberto] = useState(false);
+  const [prefilAgenda, setPrefilAgenda] = useState(null);
+
+  function irParaAgenda(cliente, telefone) {
+    setPrefilAgenda({ cliente, telefone, ts: Date.now() });
+    setAba("agenda");
+  }
 
   const [tema, setTema] = useLocalStorage(
     "crm_tema",
@@ -4052,11 +4037,11 @@ export default function App() {
 
   const telas = {
     inicio: <Inicio {...props} />,
-    agenda: <Agenda />,
-    kanban: <Kanban />,
+    agenda: <Agenda prefil={prefilAgenda} limparPrefil={() => setPrefilAgenda(null)} />,
+    kanban: <Kanban aoAgendar={irParaAgenda} />,
     pagamentos: <Pagamentos {...props} />,
-    clientes: <Pacientes {...props} />,
-    contatos: <Contatos {...props} />,
+    clientes: <Pacientes {...props} aoAgendar={irParaAgenda} />,
+    contatos: <Contatos {...props} aoAgendar={irParaAgenda} />,
     orcamentos: <Orcamentos {...props} />,
     funil: <Funil {...props} />,
     relatorios: <Relatorios {...props} />,
@@ -4067,7 +4052,7 @@ export default function App() {
       />
     ),
   };
-
+   
   const itemStyle = (ativo) => ({
     display: "flex",
     alignItems: "center",
